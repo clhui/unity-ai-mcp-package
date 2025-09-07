@@ -1,0 +1,17 @@
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\bin\Debug\net6.0-windows\McpDesktopClient.exe
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\bin\Debug\net6.0-windows\McpDesktopClient.deps.json
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\bin\Debug\net6.0-windows\McpDesktopClient.runtimeconfig.json
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\bin\Debug\net6.0-windows\McpDesktopClient.dll
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\bin\Debug\net6.0-windows\McpDesktopClient.pdb
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\McpDesktopClient.csproj.AssemblyReference.cache
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\McpDesktopClient.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\McpDesktopClient.AssemblyInfoInputs.cache
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\McpDesktopClient.AssemblyInfo.cs
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\McpDesktopClient.csproj.CoreCompileInputs.cache
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\McpDeskt.6BF1E7E6.Up2Date
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\McpDesktopClient.dll
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\refint\McpDesktopClient.dll
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\McpDesktopClient.pdb
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\McpDesktopClient.genruntimeconfig.cache
+D:\Projects\TraeProjects\unity-mcp-trae\McpDesktopClient\obj\Debug\net6.0-windows\ref\McpDesktopClient.dll

@@ -1,0 +1,138 @@
+{
+  "presets": [
+    {
+      "name": "创建场景对象",
+      "tool": "create_scene_object",
+      "description": "在Unity场景中创建一个新的游戏对象",
+      "arguments": {
+        "name": "TestCube",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "name": "获取场景信息",
+      "tool": "get_scene_info",
+      "description": "获取当前Unity场景的基本信息",
+      "arguments": {}
+    },
+    {
+      "name": "列出场景对象",
+      "tool": "list_scene_objects",
+      "description": "列出当前场景中的所有游戏对象",
+      "arguments": {
+        "include_inactive": true
+      }
+    },
+    {
+      "name": "修改对象属性",
+      "tool": "modify_object_properties",
+      "description": "修改指定游戏对象的属性",
+      "arguments": {
+        "object_name": "TestCube",
+        "properties": {
+          "position": {
+            "x": 5,
+            "y": 2,
+            "z": 0
+          },
+          "active": true
+        }
+      }
+    },
+    {
+      "name": "添加组件",
+      "tool": "add_component",
+      "description": "为游戏对象添加组件",
+      "arguments": {
+        "object_name": "TestCube",
+        "component_type": "Rigidbody",
+        "properties": {
+          "mass": 1.0,
+          "useGravity": true
+        }
+      }
+    },
+    {
+      "name": "删除场景对象",
+      "tool": "delete_scene_object",
+      "description": "从场景中删除指定的游戏对象",
+      "arguments": {
+        "object_name": "TestCube"
+      }
+    },
+    {
+      "name": "创建材质",
+      "tool": "create_material",
+      "description": "创建一个新的材质资源",
+      "arguments": {
+        "name": "TestMaterial",
+        "shader": "Standard",
+        "properties": {
+          "color": {
+            "r": 1.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+          },
+          "metallic": 0.5,
+          "smoothness": 0.8
+        }
+      }
+    },
+    {
+      "name": "应用材质",
+      "tool": "apply_material",
+      "description": "将材质应用到游戏对象",
+      "arguments": {
+        "object_name": "TestCube",
+        "material_name": "TestMaterial"
+      }
+    },
+    {
+      "name": "保存场景",
+      "tool": "save_scene",
+      "description": "保存当前场景",
+      "arguments": {
+        "path": "Assets/Scenes/TestScene.unity"
+      }
+    },
+    {
+      "name": "加载场景",
+      "tool": "load_scene",
+      "description": "加载指定的场景文件",
+      "arguments": {
+        "path": "Assets/Scenes/TestScene.unity"
+      }
+    },
+    {
+      "name": "执行脚本",
+      "tool": "execute_script",
+      "description": "在Unity编辑器中执行C#脚本代码",
+      "arguments": {
+        "code": "Debug.Log(\"Hello from MCP Desktop Client!\");"
+      }
+    },
+    {
+      "name": "获取项目设置",
+      "tool": "get_project_settings",
+      "description": "获取Unity项目的设置信息",
+      "arguments": {
+        "category": "Player"
+      }
+    }
+  ]
+}
