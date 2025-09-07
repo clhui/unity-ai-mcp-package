@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("McpDesktopClient")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+28b68ac6f9eff52b25a5649d656debddefbb957b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+90526e23b6b031bef8af49179c48513083db8ae1")]
 [assembly: System.Reflection.AssemblyProductAttribute("McpDesktopClient")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MCP Desktop Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
