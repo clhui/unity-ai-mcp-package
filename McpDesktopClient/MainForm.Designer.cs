@@ -28,12 +28,18 @@ namespace McpDesktopClient
         /// </summary>
         private void InitializeComponent()
         {
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.logViewerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBoxConnection = new System.Windows.Forms.GroupBox();
             this.buttonConnect = new System.Windows.Forms.Button();
             this.textBoxServerUrl = new System.Windows.Forms.TextBox();
             this.labelServerUrl = new System.Windows.Forms.Label();
             this.groupBoxTools = new System.Windows.Forms.GroupBox();
             this.buttonRefreshTools = new System.Windows.Forms.Button();
+            this.buttonClearSearch = new System.Windows.Forms.Button();
+            this.textBoxSearch = new System.Windows.Forms.TextBox();
+            this.labelSearch = new System.Windows.Forms.Label();
             this.listBoxTools = new System.Windows.Forms.ListBox();
             this.groupBoxToolCall = new System.Windows.Forms.GroupBox();
             this.buttonGenerateSample = new System.Windows.Forms.Button();
@@ -47,12 +53,38 @@ namespace McpDesktopClient
             this.textBoxResults = new System.Windows.Forms.TextBox();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.menuStrip.SuspendLayout();
             this.groupBoxConnection.SuspendLayout();
             this.groupBoxTools.SuspendLayout();
             this.groupBoxToolCall.SuspendLayout();
             this.groupBoxResults.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // menuStrip
+            // 
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolsToolStripMenuItem});
+            this.menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Size = new System.Drawing.Size(784, 24);
+            this.menuStrip.TabIndex = 0;
+            this.menuStrip.Text = "menuStrip";
+            // 
+            // toolsToolStripMenuItem
+            // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.logViewerToolStripMenuItem});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.toolsToolStripMenuItem.Text = "工具";
+            // 
+            // logViewerToolStripMenuItem
+            // 
+            this.logViewerToolStripMenuItem.Name = "logViewerToolStripMenuItem";
+            this.logViewerToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.logViewerToolStripMenuItem.Text = "日志查看器";
+            this.logViewerToolStripMenuItem.Click += new System.EventHandler(this.LogViewerToolStripMenuItem_Click);
             // 
             // groupBoxConnection
             // 
@@ -96,6 +128,9 @@ namespace McpDesktopClient
             // groupBoxTools
             // 
             this.groupBoxTools.Controls.Add(this.buttonRefreshTools);
+            this.groupBoxTools.Controls.Add(this.buttonClearSearch);
+            this.groupBoxTools.Controls.Add(this.textBoxSearch);
+            this.groupBoxTools.Controls.Add(this.labelSearch);
             this.groupBoxTools.Controls.Add(this.listBoxTools);
             this.groupBoxTools.Location = new System.Drawing.Point(12, 78);
             this.groupBoxTools.Name = "groupBoxTools";
@@ -109,19 +144,46 @@ namespace McpDesktopClient
             this.buttonRefreshTools.Location = new System.Drawing.Point(15, 260);
             this.buttonRefreshTools.Name = "buttonRefreshTools";
             this.buttonRefreshTools.Size = new System.Drawing.Size(100, 25);
-            this.buttonRefreshTools.TabIndex = 1;
+            this.buttonRefreshTools.TabIndex = 3;
             this.buttonRefreshTools.Text = "刷新工具";
             this.buttonRefreshTools.UseVisualStyleBackColor = true;
             this.buttonRefreshTools.Click += new System.EventHandler(this.ButtonRefreshTools_Click);
+            // 
+            // buttonClearSearch
+            // 
+            this.buttonClearSearch.Location = new System.Drawing.Point(280, 50);
+            this.buttonClearSearch.Name = "buttonClearSearch";
+            this.buttonClearSearch.Size = new System.Drawing.Size(75, 23);
+            this.buttonClearSearch.TabIndex = 2;
+            this.buttonClearSearch.Text = "清除";
+            this.buttonClearSearch.UseVisualStyleBackColor = true;
+            this.buttonClearSearch.Click += new System.EventHandler(this.ButtonClearSearch_Click);
+            // 
+            // textBoxSearch
+            // 
+            this.textBoxSearch.Location = new System.Drawing.Point(60, 50);
+            this.textBoxSearch.Name = "textBoxSearch";
+            this.textBoxSearch.Size = new System.Drawing.Size(210, 23);
+            this.textBoxSearch.TabIndex = 1;
+            this.textBoxSearch.TextChanged += new System.EventHandler(this.TextBoxSearch_TextChanged);
+            // 
+            // labelSearch
+            // 
+            this.labelSearch.AutoSize = true;
+            this.labelSearch.Location = new System.Drawing.Point(15, 53);
+            this.labelSearch.Name = "labelSearch";
+            this.labelSearch.Size = new System.Drawing.Size(39, 17);
+            this.labelSearch.TabIndex = 0;
+            this.labelSearch.Text = "搜索:";
             // 
             // listBoxTools
             // 
             this.listBoxTools.FormattingEnabled = true;
             this.listBoxTools.ItemHeight = 17;
-            this.listBoxTools.Location = new System.Drawing.Point(15, 25);
+            this.listBoxTools.Location = new System.Drawing.Point(15, 80);
             this.listBoxTools.Name = "listBoxTools";
-            this.listBoxTools.Size = new System.Drawing.Size(340, 225);
-            this.listBoxTools.TabIndex = 0;
+            this.listBoxTools.Size = new System.Drawing.Size(340, 170);
+            this.listBoxTools.TabIndex = 4;
             this.listBoxTools.SelectedIndexChanged += new System.EventHandler(this.ListBoxTools_SelectedIndexChanged);
             // 
             // groupBoxToolCall
@@ -252,11 +314,15 @@ namespace McpDesktopClient
             this.Controls.Add(this.groupBoxToolCall);
             this.Controls.Add(this.groupBoxTools);
             this.Controls.Add(this.groupBoxConnection);
+            this.Controls.Add(this.menuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MCP Desktop Client - Unity MCP服务器测试工具";
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
             this.groupBoxConnection.ResumeLayout(false);
             this.groupBoxConnection.PerformLayout();
             this.groupBoxTools.ResumeLayout(false);
@@ -279,6 +345,9 @@ namespace McpDesktopClient
         private System.Windows.Forms.Label labelServerUrl;
         private System.Windows.Forms.GroupBox groupBoxTools;
         private System.Windows.Forms.Button buttonRefreshTools;
+        private System.Windows.Forms.Button buttonClearSearch;
+        private System.Windows.Forms.TextBox textBoxSearch;
+        private System.Windows.Forms.Label labelSearch;
         private System.Windows.Forms.ListBox listBoxTools;
         private System.Windows.Forms.GroupBox groupBoxToolCall;
         private System.Windows.Forms.Button buttonGenerateSample;
@@ -292,5 +361,8 @@ namespace McpDesktopClient
         private System.Windows.Forms.TextBox textBoxResults;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
+        private System.Windows.Forms.MenuStrip menuStrip;
+        private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem logViewerToolStripMenuItem;
     }
 }

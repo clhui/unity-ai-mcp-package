@@ -137,6 +137,11 @@ namespace McpDesktopClient.Services
         /// </summary>
         public Dictionary<string, object> GenerateArgumentsWithDependencyCheck(McpTool tool)
         {
+            if (tool == null || string.IsNullOrEmpty(tool.Name))
+            {
+                return GenerateDefaultSample();
+            }
+            
             var sample = GenerateSampleArguments(tool);
             
             if (_toolDependencies.TryGetValue(tool.Name, out var dependency))
@@ -150,27 +155,35 @@ namespace McpDesktopClient.Services
         
         private Dictionary<string, object> EnhanceSampleWithDependencyInfo(Dictionary<string, object> sample, ToolDependencyInfo dependency, McpTool tool)
         {
+            if (sample == null || dependency == null)
+            {
+                return sample ?? new Dictionary<string, object>();
+            }
+            
             var enhancedSample = new Dictionary<string, object>(sample);
             
             // 根据上下文要求调整样例数据
-            foreach (var requirement in dependency.ContextRequirements)
+            if (dependency.ContextRequirements != null)
             {
-                if (requirement.Key == "gameObject" && requirement.Value.ToString() == "existing")
+                foreach (var requirement in dependency.ContextRequirements)
                 {
-                    // 如果需要现有游戏对象，提供更真实的名称
-                    if (enhancedSample.ContainsKey("gameObject"))
+                    if (requirement.Key == "gameObject" && requirement.Value?.ToString() == "existing")
                     {
-                        enhancedSample["gameObject"] = "Main Camera"; // 场景中通常存在的对象
-                    }
-                    if (enhancedSample.ContainsKey("name"))
-                    {
-                        enhancedSample["name"] = "Main Camera";
+                        // 如果需要现有游戏对象，提供更真实的名称
+                        if (enhancedSample.ContainsKey("gameObject"))
+                        {
+                            enhancedSample["gameObject"] = "Main Camera"; // 场景中通常存在的对象
+                        }
+                        if (enhancedSample.ContainsKey("name"))
+                        {
+                            enhancedSample["name"] = "Main Camera";
+                        }
                     }
                 }
             }
             
             // 根据所需组件调整参数
-            if (dependency.RequiredComponents.Any() && enhancedSample.ContainsKey("component"))
+            if (dependency.RequiredComponents != null && dependency.RequiredComponents.Any() && enhancedSample.ContainsKey("component"))
             {
                 enhancedSample["component"] = dependency.RequiredComponents.First();
             }
@@ -178,9 +191,9 @@ namespace McpDesktopClient.Services
             // 添加依赖项信息到样例中（作为注释）
             enhancedSample["_dependency_info"] = new
             {
-                description = dependency.Description,
-                requiredInterfaces = dependency.RequiredInterfaces,
-                requiredComponents = dependency.RequiredComponents,
+                description = dependency.Description ?? string.Empty,
+                requiredInterfaces = dependency.RequiredInterfaces ?? new List<string>(),
+                requiredComponents = dependency.RequiredComponents ?? new List<string>(),
                 requiresEditMode = dependency.RequiresEditMode,
                 requiresPlayMode = dependency.RequiresPlayMode
             };

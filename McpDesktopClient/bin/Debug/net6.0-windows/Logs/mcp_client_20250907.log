@@ -1,0 +1,79 @@
+﻿[2025-09-07 21:46:49.725] [INFO] [Application] MCP桌面客户端启动成功
+[2025-09-07 21:46:52.739] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 21:46:52.977] [INFO] [Connection] 连接成功：发现 55 个工具
+[2025-09-07 21:46:55.499] [INFO] [ToolCall] 开始调用工具：list_scenes
+[2025-09-07 21:46:55.504] [DEBUG] [ToolCall] 参数解析成功，参数数量：2
+[2025-09-07 21:46:55.617] [INFO] [ToolCall] 工具调用成功：list_scenes
+[2025-09-07 21:46:56.481] [INFO] [ToolCall] 开始调用工具：list_scenes
+[2025-09-07 21:46:56.483] [DEBUG] [ToolCall] 参数解析成功，参数数量：2
+[2025-09-07 21:46:56.516] [INFO] [ToolCall] 工具调用成功：list_scenes
+[2025-09-07 21:47:09.793] [INFO] [ToolCall] 开始调用工具：create_gameobject
+[2025-09-07 21:47:09.796] [DEBUG] [ToolCall] 参数解析成功，参数数量：2
+[2025-09-07 21:47:09.912] [INFO] [ToolCall] 工具调用成功：create_gameobject
+[2025-09-07 21:49:35.950] [INFO] [Application] MCP桌面客户端启动成功
+[2025-09-07 21:49:55.769] [INFO] [Application] MCP桌面客户端启动成功
+[2025-09-07 21:49:57.547] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 21:49:57.793] [INFO] [Connection] 连接成功：发现 55 个工具
+[2025-09-07 21:50:00.563] [INFO] [ToolCall] 开始调用工具：list_scenes
+[2025-09-07 21:50:00.570] [DEBUG] [ToolCall] 参数解析成功，参数数量：2
+[2025-09-07 21:50:00.648] [INFO] [ToolCall] 工具调用成功：list_scenes
+[2025-09-07 21:50:04.057] [INFO] [ToolCall] 开始调用工具：play_mode_start
+[2025-09-07 21:50:04.060] [DEBUG] [ToolCall] 参数解析成功，参数数量：1
+[2025-09-07 21:50:04.141] [INFO] [ToolCall] 工具调用成功：play_mode_start
+[2025-09-07 21:50:06.298] [INFO] [ToolCall] 开始调用工具：play_mode_start
+[2025-09-07 21:50:06.301] [DEBUG] [ToolCall] 参数解析成功，参数数量：1
+[2025-09-07 21:50:10.333] [ERROR] [ToolCall] 工具调用返回错误：play_mode_start
+[2025-09-07 21:50:12.433] [INFO] [ToolCall] 开始调用工具：play_mode_start
+[2025-09-07 21:50:12.435] [DEBUG] [ToolCall] 参数解析成功，参数数量：1
+[2025-09-07 21:50:12.957] [ERROR] [ToolCall] 工具调用返回错误：play_mode_start
+[2025-09-07 21:50:14.697] [INFO] [ToolCall] 开始调用工具：play_mode_start
+[2025-09-07 21:50:14.700] [DEBUG] [ToolCall] 参数解析成功，参数数量：1
+[2025-09-07 21:50:14.724] [INFO] [ToolCall] 工具调用成功：play_mode_start
+[2025-09-07 21:50:17.169] [INFO] [ToolCall] 开始调用工具：play_mode_stop
+[2025-09-07 21:50:17.171] [DEBUG] [ToolCall] 参数解析成功，参数数量：1
+[2025-09-07 21:50:17.178] [INFO] [ToolCall] 工具调用成功：play_mode_stop
+[2025-09-07 21:50:25.882] [INFO] [ToolCall] 开始调用工具：play_mode_stop
+[2025-09-07 21:50:25.885] [DEBUG] [ToolCall] 参数解析成功，参数数量：1
+[2025-09-07 21:50:25.911] [INFO] [ToolCall] 工具调用成功：play_mode_stop
+[2025-09-07 21:50:30.625] [INFO] [ToolCall] 开始调用工具：open_scene
+[2025-09-07 21:50:30.628] [DEBUG] [ToolCall] 参数解析成功，参数数量：2
+[2025-09-07 21:50:30.985] [INFO] [ToolCall] 工具调用成功：open_scene
+[2025-09-07 21:50:33.665] [INFO] [ToolCall] 开始调用工具：list_scenes
+[2025-09-07 21:50:33.668] [DEBUG] [ToolCall] 参数解析成功，参数数量：2
+[2025-09-07 21:50:33.724] [INFO] [ToolCall] 工具调用成功：list_scenes
+[2025-09-07 21:50:37.137] [INFO] [ToolCall] 开始调用工具：create_gameobject
+[2025-09-07 21:50:37.140] [DEBUG] [ToolCall] 参数解析成功，参数数量：2
+[2025-09-07 21:50:37.217] [INFO] [ToolCall] 工具调用成功：create_gameobject
+[2025-09-07 21:50:57.585] [INFO] [ToolCall] 开始调用工具：list_components
+[2025-09-07 21:50:57.587] [DEBUG] [ToolCall] 参数解析成功，参数数量：1
+[2025-09-07 21:50:57.624] [ERROR] [ToolCall] 工具调用返回错误：list_components
+[2025-09-07 21:51:11.530] [INFO] [ToolCall] 开始调用工具：create_gameobject
+[2025-09-07 21:51:11.533] [DEBUG] [ToolCall] 参数解析成功，参数数量：2
+[2025-09-07 21:51:11.573] [INFO] [ToolCall] 工具调用成功：create_gameobject
+[2025-09-07 21:51:12.889] [INFO] [ToolCall] 开始调用工具：create_gameobject
+[2025-09-07 21:51:12.892] [DEBUG] [ToolCall] 参数解析成功，参数数量：2
+[2025-09-07 21:51:12.979] [INFO] [ToolCall] 工具调用成功：create_gameobject
+[2025-09-07 22:08:18.802] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:08:19.005] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 22:10:46.090] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:10:46.288] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 22:10:57.978] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:10:58.020] [INFO] [Connection] 连接成功：发现 47 个工具
+[2025-09-07 22:11:45.659] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:11:45.704] [INFO] [Connection] 连接成功：发现 47 个工具
+[2025-09-07 22:11:57.291] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:11:57.334] [INFO] [Connection] 连接成功：发现 47 个工具
+[2025-09-07 22:17:03.211] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:17:03.353] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 22:23:59.779] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:23:59.928] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 22:24:08.252] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:24:08.306] [INFO] [Connection] 连接成功：发现 47 个工具
+[2025-09-07 22:24:16.171] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:24:16.218] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 22:25:43.939] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:25:44.154] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 22:25:46.507] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:25:46.562] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 22:25:53.180] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:25:53.199] [INFO] [Connection] 连接成功：发现 10 个工具

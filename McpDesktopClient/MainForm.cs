@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using McpDesktopClient.Models;
 using McpDesktopClient.Services;
+using McpDesktopClient.Forms;
 
 namespace McpDesktopClient
 {
@@ -14,7 +15,9 @@ namespace McpDesktopClient
         private McpClientService _mcpClient;
         private TestPresetManager _presetManager;
         private SampleDataGenerator _sampleGenerator;
+        private LoggingService _loggingService;
         private List<McpTool> _availableTools = new List<McpTool>();
+        private List<McpTool> _filteredTools = new List<McpTool>();
         private McpTool? _selectedTool;
 
         public MainForm()
@@ -23,7 +26,11 @@ namespace McpDesktopClient
             _mcpClient = new McpClientService();
             _presetManager = new TestPresetManager();
             _sampleGenerator = new SampleDataGenerator();
+            _loggingService = new LoggingService();
             InitializeForm();
+            
+            // 记录应用程序启动日志
+            _loggingService.LogInfo("Application", "MCP桌面客户端启动成功");
         }
 
         private void InitializeForm()
@@ -92,8 +99,11 @@ namespace McpDesktopClient
         
         private void SavePreset_Click(object sender, EventArgs e)
         {
+            _loggingService.LogInfo("Preset", "用户尝试保存预设");
+            
             if (_selectedTool == null)
             {
+                _loggingService.LogWarning("Preset", "保存预设失败：未选择工具");
                 MessageBox.Show("请先选择一个工具", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -101,6 +111,7 @@ namespace McpDesktopClient
             var name = Microsoft.VisualBasic.Interaction.InputBox("请输入预设名称:", "保存预设", $"{_selectedTool.Name}_预设");
             if (string.IsNullOrWhiteSpace(name))
             {
+                _loggingService.LogInfo("Preset", "用户取消保存预设");
                 return;
             }
             
@@ -119,10 +130,12 @@ namespace McpDesktopClient
                 
                 _presetManager.AddPreset(preset);
                 toolStripStatusLabel.Text = $"预设 '{name}' 已保存";
+                _loggingService.LogInfo("Preset", $"预设保存成功：{name} (工具: {_selectedTool.Name})");
                 MessageBox.Show($"预设 '{name}' 保存成功！", "保存成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (JsonException ex)
             {
+                _loggingService.LogError("Preset", $"保存预设失败：JSON格式错误 - {ex.Message}", ex);
                 MessageBox.Show($"参数JSON格式错误，无法保存预设：{ex.Message}", "格式错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -136,14 +149,17 @@ namespace McpDesktopClient
 
         private async void ButtonConnect_Click(object sender, EventArgs e)
         {
+            var serverUrl = textBoxServerUrl.Text.Trim();
+            _loggingService.LogInfo("Connection", $"用户尝试连接到服务器：{serverUrl}");
+            
             try
             {
                 buttonConnect.Enabled = false;
                 toolStripStatusLabel.Text = "正在连接...";
 
-                var serverUrl = textBoxServerUrl.Text.Trim();
                 if (string.IsNullOrEmpty(serverUrl))
                 {
+                    _loggingService.LogWarning("Connection", "连接失败：服务器地址为空");
                     MessageBox.Show("请输入服务器地址", "错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -157,17 +173,20 @@ namespace McpDesktopClient
                     _availableTools = toolsList.Tools;
                     UpdateToolsList();
                     toolStripStatusLabel.Text = $"已连接 - 发现 {_availableTools.Count} 个工具";
+                    _loggingService.LogInfo("Connection", $"连接成功：发现 {_availableTools.Count} 个工具");
                     MessageBox.Show($"连接成功！发现 {_availableTools.Count} 个可用工具。", "连接成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
                     toolStripStatusLabel.Text = "连接失败";
+                    _loggingService.LogError("Connection", "连接失败：无法获取工具列表");
                     MessageBox.Show("无法连接到MCP服务器，请检查服务器地址和状态。", "连接失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
             {
                 toolStripStatusLabel.Text = "连接失败";
+                _loggingService.LogError("Connection", $"连接异常：{ex.Message}", ex);
                 MessageBox.Show($"连接失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
@@ -209,8 +228,14 @@ namespace McpDesktopClient
 
         private void UpdateToolsList()
         {
+            _filteredTools = _availableTools.ToList();
+            RefreshToolsDisplay();
+        }
+        
+        private void RefreshToolsDisplay()
+        {
             listBoxTools.Items.Clear();
-            foreach (var tool in _availableTools)
+            foreach (var tool in _filteredTools)
             {
                 listBoxTools.Items.Add($"{tool.Name} - {tool.Description}");
             }
@@ -218,11 +243,51 @@ namespace McpDesktopClient
 
         private void ListBoxTools_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listBoxTools.SelectedIndex >= 0 && listBoxTools.SelectedIndex < _availableTools.Count)
+            if (listBoxTools.SelectedIndex >= 0 && listBoxTools.SelectedIndex < _filteredTools.Count)
             {
-                _selectedTool = _availableTools[listBoxTools.SelectedIndex];
+                _selectedTool = _filteredTools[listBoxTools.SelectedIndex];
                 textBoxSelectedTool.Text = _selectedTool.Name;
                 UpdateArgumentsTemplate();
+            }
+        }
+        
+        private void TextBoxSearch_TextChanged(object sender, EventArgs e)
+        {
+            FilterTools();
+        }
+        
+        private void ButtonClearSearch_Click(object sender, EventArgs e)
+        {
+            textBoxSearch.Text = "";
+            FilterTools();
+        }
+        
+        private void FilterTools()
+        {
+            var searchText = textBoxSearch.Text.Trim().ToLower();
+            
+            if (string.IsNullOrEmpty(searchText))
+            {
+                _filteredTools = _availableTools.ToList();
+            }
+            else
+            {
+                _filteredTools = _availableTools.Where(tool => 
+                    tool.Name.ToLower().Contains(searchText) || 
+                    tool.Description.ToLower().Contains(searchText)
+                ).ToList();
+            }
+            
+            RefreshToolsDisplay();
+            
+            // 更新状态栏显示过滤结果
+            if (string.IsNullOrEmpty(searchText))
+            {
+                toolStripStatusLabel.Text = $"显示全部 {_filteredTools.Count} 个工具";
+            }
+            else
+            {
+                toolStripStatusLabel.Text = $"搜索到 {_filteredTools.Count} 个工具 (共 {_availableTools.Count} 个)";
             }
         }
 
@@ -288,9 +353,12 @@ namespace McpDesktopClient
         {
             if (_selectedTool == null)
             {
+                _loggingService.LogWarning("ToolCall", "工具调用失败：未选择工具");
                 MessageBox.Show("请先选择一个工具", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+            _loggingService.LogInfo("ToolCall", $"开始调用工具：{_selectedTool.Name}");
 
             try
             {
@@ -304,6 +372,7 @@ namespace McpDesktopClient
                 if (string.IsNullOrEmpty(argumentsText) || argumentsText == "{}")
                 {
                     arguments = new Dictionary<string, object>();
+                    _loggingService.LogDebug("ToolCall", "使用空参数调用工具");
                 }
                 else
                 {
@@ -311,9 +380,11 @@ namespace McpDesktopClient
                     {
                         arguments = JsonConvert.DeserializeObject<Dictionary<string, object>>(argumentsText) 
                                    ?? new Dictionary<string, object>();
+                        _loggingService.LogDebug("ToolCall", $"参数解析成功，参数数量：{arguments.Count}");
                     }
                     catch (JsonException ex)
                     {
+                        _loggingService.LogError("ToolCall", $"参数JSON格式错误：{ex.Message}", ex);
                         MessageBox.Show($"参数JSON格式错误：{ex.Message}", "参数错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
@@ -329,10 +400,12 @@ namespace McpDesktopClient
                     if (result.IsError)
                     {
                         resultText = "错误：\r\n";
+                        _loggingService.LogError("ToolCall", $"工具调用返回错误：{_selectedTool.Name}");
                     }
                     else
                     {
                         resultText = "成功：\r\n";
+                        _loggingService.LogInfo("ToolCall", $"工具调用成功：{_selectedTool.Name}");
                     }
 
                     foreach (var content in result.Content)
@@ -346,6 +419,7 @@ namespace McpDesktopClient
                 else
                 {
                     textBoxResults.Text = "调用失败：未收到响应";
+                    _loggingService.LogError("ToolCall", $"工具调用失败：未收到响应 - {_selectedTool.Name}");
                     toolStripStatusLabel.Text = "工具调用失败";
                 }
             }
@@ -407,6 +481,21 @@ namespace McpDesktopClient
             finally
             {
                 buttonThreadStackInfo.Enabled = true;
+            }
+        }
+
+        private void LogViewerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var logViewerForm = new LogViewerForm(_loggingService);
+                logViewerForm.Show();
+                _loggingService.LogInfo("UI", "打开日志查看器窗口");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开日志查看器时发生错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _loggingService.LogError("UI", $"打开日志查看器失败：{ex.Message}");
             }
         }
 
