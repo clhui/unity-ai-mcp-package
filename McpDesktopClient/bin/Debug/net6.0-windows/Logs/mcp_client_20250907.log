@@ -77,3 +77,23 @@
 [2025-09-07 22:25:46.562] [INFO] [Connection] 连接成功：发现 58 个工具
 [2025-09-07 22:25:53.180] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
 [2025-09-07 22:25:53.199] [INFO] [Connection] 连接成功：发现 10 个工具
+[2025-09-07 22:39:00.749] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:39:00.874] [INFO] [Connection] 连接成功：发现 0 个工具
+[2025-09-07 22:44:29.725] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:44:29.853] [INFO] [Connection] 连接成功：发现 0 个工具
+[2025-09-07 22:52:22.926] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:52:23.056] [INFO] [Connection] 连接成功：发现 0 个工具
+[2025-09-07 22:52:27.998] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:52:28.043] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 22:56:50.278] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:56:50.437] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 22:59:34.214] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:59:38.232] [ERROR] [Connection] 连接失败：无法获取工具列表
+[2025-09-07 22:59:41.647] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 22:59:41.885] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 23:04:55.334] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 23:04:55.494] [INFO] [Connection] 连接成功：发现 58 个工具
+[2025-09-07 23:05:01.334] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 23:05:01.357] [INFO] [Connection] 连接成功：发现 0 个工具
+[2025-09-07 23:05:08.040] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 23:05:08.061] [INFO] [Connection] 连接成功：发现 3 个工具
