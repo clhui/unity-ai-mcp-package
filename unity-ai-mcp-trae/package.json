@@ -1,0 +1,27 @@
+{
+  "name": "com.unity.ai-mcp-trae",
+  "version": "1.9.95",
+  "displayName": "Unity MCP Trae FOR AI",
+  "description": "Model Context Protocol server for Unity Editor automation with Trae AI integration",
+  "unity": "2023.2",
+  "unityRelease": "20f1",
+  "keywords": [
+    "mcp",
+    "automation",
+    "editor",
+    "tools"
+  ],
+  "author": {
+    "name": "Unity MCP CLH"
+  },
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "files": [
+    "Editor/**",
+    "Runtime/**",
+    "*.md",
+    "*.py"
+  ],
+  "samples": []
+}

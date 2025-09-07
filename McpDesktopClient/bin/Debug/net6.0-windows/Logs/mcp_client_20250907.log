@@ -97,3 +97,5 @@
 [2025-09-07 23:05:01.357] [INFO] [Connection] 连接成功：发现 0 个工具
 [2025-09-07 23:05:08.040] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
 [2025-09-07 23:05:08.061] [INFO] [Connection] 连接成功：发现 3 个工具
+[2025-09-07 23:39:29.552] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-07 23:39:29.773] [INFO] [Connection] 连接成功：发现 40 个工具

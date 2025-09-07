@@ -1,0 +1,239 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+public class {MANAGER_NAME} : MonoBehaviour
+{
+    // 单例实例
+{SINGLETON_INSTANCE}
+
+    // 游戏状态
+    [SerializeField]
+    private string currentState = "Initialized";
+    
+    // 游戏数据
+    [SerializeField]
+    private Dictionary<string, object> gameData = new Dictionary<string, object>();
+    
+    // 状态变化事件
+    public event System.Action<string, string> OnStateChanged;
+    
+    // 游戏数据变化事件
+    public event System.Action<string, object> OnDataChanged;
+    
+    public string CurrentState => currentState;
+    
+    private void Awake()
+    {
+{SINGLETON_IMPLEMENTATION}
+        
+{AUTO_INITIALIZE}
+    }
+    
+    private void Initialize()
+    {
+        Debug.Log($"{MANAGER_NAME} 初始化完成");
+        
+        // 初始化游戏数据
+        InitializeGameData();
+    }
+    
+    private void InitializeGameData()
+    {
+        // 设置默认游戏数据
+        SetData("playerLevel", 1);
+        SetData("playerScore", 0);
+        SetData("gameStartTime", DateTime.Now.ToString());
+    }
+    
+    /// <summary>
+    /// 设置游戏状态
+    /// </summary>
+    /// <param name="newState">新状态</param>
+    /// <param name="stateData">状态数据</param>
+    public void SetState(string newState, string stateData = null)
+    {
+        if (string.IsNullOrEmpty(newState))
+        {
+            Debug.LogError("状态名称不能为空");
+            return;
+        }
+        
+        string previousState = currentState;
+        currentState = newState;
+        
+        // 解析状态数据
+        if (!string.IsNullOrEmpty(stateData))
+        {
+            try
+            {
+                var data = JObject.Parse(stateData);
+                foreach (var kvp in data)
+                {
+                    SetData(kvp.Key, kvp.Value.ToObject<object>());
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"解析状态数据失败: {ex.Message}");
+            }
+        }
+        
+        // 触发状态变化事件
+        OnStateChanged?.Invoke(previousState, currentState);
+        
+        // 处理状态变化
+        HandleStateChange(previousState, currentState);
+        
+        Debug.Log($"游戏状态变化: {previousState} -> {currentState}");
+    }
+    
+    /// <summary>
+    /// 获取当前游戏状态
+    /// </summary>
+    /// <returns>当前状态</returns>
+    public string GetState()
+    {
+        return currentState;
+    }
+    
+    /// <summary>
+    /// 设置游戏数据
+    /// </summary>
+    /// <param name="key">数据键</param>
+    /// <param name="value">数据值</param>
+    public void SetData(string key, object value)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            Debug.LogError("数据键不能为空");
+            return;
+        }
+        
+        gameData[key] = value;
+        OnDataChanged?.Invoke(key, value);
+        
+        Debug.Log($"游戏数据更新: {key} = {value}");
+    }
+    
+    /// <summary>
+    /// 获取游戏数据
+    /// </summary>
+    /// <param name="key">数据键</param>
+    /// <returns>数据值</returns>
+    public object GetData(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            Debug.LogError("数据键不能为空");
+            return null;
+        }
+        
+        return gameData.ContainsKey(key) ? gameData[key] : null;
+    }
+    
+    /// <summary>
+    /// 获取所有游戏数据
+    /// </summary>
+    /// <returns>所有数据的字典</returns>
+    public Dictionary<string, object> GetAllData()
+    {
+        return new Dictionary<string, object>(gameData);
+    }
+    
+    /// <summary>
+    /// 处理状态变化
+    /// </summary>
+    /// <param name="previousState">之前的状态</param>
+    /// <param name="newState">新状态</param>
+    private void HandleStateChange(string previousState, string newState)
+    {
+        switch (newState)
+        {
+            case "GameStart":
+                OnGameStart();
+                break;
+            case "GamePause":
+                OnGamePause();
+                break;
+            case "GameOver":
+                OnGameOver();
+                break;
+            case "ReturnToMenu":
+                OnReturnToMenu();
+                break;
+            default:
+                Debug.Log($"未处理的状态变化: {newState}");
+                break;
+        }
+    }
+    
+    private void OnGameStart()
+    {
+        Debug.Log("游戏开始");
+        SetData("gameStartTime", DateTime.Now.ToString());
+    }
+    
+    private void OnGamePause()
+    {
+        Debug.Log("游戏暂停");
+        Time.timeScale = 0f;
+    }
+    
+    private void OnGameOver()
+    {
+        Debug.Log("游戏结束");
+        SetData("gameEndTime", DateTime.Now.ToString());
+        Time.timeScale = 1f;
+    }
+    
+    private void OnReturnToMenu()
+    {
+        Debug.Log("返回菜单");
+        Time.timeScale = 1f;
+    }
+    
+    // 保存游戏数据到PlayerPrefs
+    public void SaveToPlayerPrefs()
+    {
+        try
+        {
+            string jsonData = JsonConvert.SerializeObject(gameData);
+            PlayerPrefs.SetString($"{MANAGER_NAME}_GameData", jsonData);
+            PlayerPrefs.SetString($"{MANAGER_NAME}_CurrentState", currentState);
+            PlayerPrefs.Save();
+            Debug.Log("游戏数据已保存到PlayerPrefs");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"保存游戏数据失败: {ex.Message}");
+        }
+    }
+    
+    // 从PlayerPrefs加载游戏数据
+    public void LoadFromPlayerPrefs()
+    {
+        try
+        {
+            if (PlayerPrefs.HasKey($"{MANAGER_NAME}_GameData"))
+            {
+                string jsonData = PlayerPrefs.GetString($"{MANAGER_NAME}_GameData");
+                gameData = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonData) ?? new Dictionary<string, object>();
+            }
+            
+            if (PlayerPrefs.HasKey($"{MANAGER_NAME}_CurrentState"))
+            {
+                currentState = PlayerPrefs.GetString($"{MANAGER_NAME}_CurrentState");
+            }
+            
+            Debug.Log("游戏数据已从PlayerPrefs加载");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"加载游戏数据失败: {ex.Message}");
+            InitializeGameData();
+        }
+    }
+}

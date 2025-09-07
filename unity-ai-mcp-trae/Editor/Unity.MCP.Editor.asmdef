@@ -1,0 +1,27 @@
+{
+    "name": "Unity.MCP.Editor",
+    "rootNamespace": "Unity.MCP.Editor",
+    "references": [
+        "Unity.MCP.Runtime",
+        "Unity.Nuget.Newtonsoft-Json",
+        "Unity.MCP.Tools.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+         {
+             "name": "com.unity.mcp-server",
+             "expression": "1.9.0",
+             "define": "UNITY_MCP_AVAILABLE"
+         }
+     ],
+     "noEngineReferences": false,
+     "version": "1.9.1"
+ }
