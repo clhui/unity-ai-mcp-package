@@ -708,8 +708,7 @@ namespace Unity.MCP.Editor
             }
             
             EditorGUILayout.EndVertical();
-        
-        
+            
             // 使用说明
             if (_server?.IsRunning == true)
             {

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.97] - 2025-01-07
+### Fixed
+- 修复 McpServerWindow 中的 GUI 布局错误
+- 解决 "Invalid GUILayout state" 错误，确保所有 Begin/End 调用匹配
+- 清理多余的空行和格式问题
+
+## [1.9.96] - 2025-01-07
+### Fixed
+- 修复 CHANGELOG.md.meta 文件的 YAML 格式问题
+- 确保 assetBundleVariant 字段有正确的空值格式
+
 ## [1.9.95] - 2024-12-19
 
 ### Changed
