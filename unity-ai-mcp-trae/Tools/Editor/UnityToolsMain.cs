@@ -700,5 +700,49 @@ namespace Unity.MCP.Tools.Editor
         }
         
         #endregion
+
+        #region Prefab Management - 预制体管理
+        
+        /// <summary>
+        /// 将游戏对象保存为预制体
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult CreatePrefab(JObject arguments)
+        {
+            return UnityPrefabTools.CreatePrefab(arguments);
+        }
+        
+        /// <summary>
+        /// 实例化预制体
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult InstantiatePrefab(JObject arguments)
+        {
+            return UnityPrefabTools.InstantiatePrefab(arguments);
+        }
+        
+        /// <summary>
+        /// 列出项目中的所有预制体
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>预制体列表</returns>
+        public static McpToolResult ListPrefabs(JObject arguments)
+        {
+            return UnityPrefabTools.ListPrefabs(arguments);
+        }
+        
+        /// <summary>
+        /// 获取预制体信息
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>预制体信息</returns>
+        public static McpToolResult GetPrefabInfo(JObject arguments)
+        {
+            return UnityPrefabTools.GetPrefabInfo(arguments);
+        }
+        
+        #endregion
     }
 }

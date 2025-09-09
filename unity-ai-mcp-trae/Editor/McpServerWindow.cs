@@ -23,7 +23,7 @@ namespace Unity.MCP.Editor
         // 工具配置相关
         private Vector2 _toolConfigScrollPosition;
         private string _toolSearchFilter = "";
-        private int _priorityFilter = 0; // 0=全部, 1=高优, 2=中优, 3=低优
+        private int _priorityFilter = 0; // 0=全部, 1=简单游戏必须, 2=复杂游戏必须, 3=极复杂游戏必须
         
         // 工具中文名称映射
         private static readonly Dictionary<string, string> _toolChineseNames = new Dictionary<string, string>
@@ -84,6 +84,12 @@ namespace Unity.MCP.Editor
             ["create_light"] = "创建光源",
             ["set_light_properties"] = "设置光源属性",
             
+            // 预制体管理工具
+            ["create_prefab"] = "创建预制体",
+            ["instantiate_prefab"] = "实例化预制体",
+            ["list_prefabs"] = "列出预制体",
+            ["get_prefab_info"] = "获取预制体信息",
+            
             // 脚本管理工具
             ["create_script"] = "创建脚本",
             ["modify_script"] = "修改脚本",
@@ -119,7 +125,11 @@ namespace Unity.MCP.Editor
             ["import_asset"] = "导入资源",
             ["refresh_assets"] = "刷新资源数据库",
             ["compile_scripts"] = "编译脚本",
-            ["wait_for_compilation"] = "等待编译完成"
+            ["wait_for_compilation"] = "等待编译完成",
+            
+            // 编辑器工具
+            ["refresh_editor"] = "刷新编辑器",
+            ["get_editor_status"] = "获取编辑器状态"
         };
         private bool _showToolConfig = false;
         private McpToolConfig _toolConfig;
@@ -131,38 +141,56 @@ namespace Unity.MCP.Editor
         // 工具优先级定义
         private enum ToolPriority
         {
-            High,    // 高优先级
-            Medium,  // 中优先级
-            Low      // 低优先级
+            High,    // 简单游戏必须
+            Medium,  // 复杂游戏必须
+            Low      // 极复杂游戏必须
         }
         
         // 获取工具优先级
         private ToolPriority GetToolPriority(string toolName)
         {
-            // 高优先级工具 - 常用的基础功能
+            // 高优先级工具 - 做简单游戏必须的基础功能
             var highPriorityTools = new HashSet<string>
             {
                 "create_gameobject", "find_gameobject", "delete_gameobject", "set_transform",
                 "list_scenes", "open_scene", "load_scene",
                 "play_mode_start", "play_mode_stop", "get_play_mode_status",
-                "get_current_scene_info", "add_component", "remove_component",
-                "get_unity_logs", "clear_unity_logs"
+                "add_component", "remove_component", "get_component_properties", "set_component_properties",
+                "create_material", "assign_material", "create_light"
             };
             
-            // 低优先级工具 - 高级或特殊功能
+            // 中优先级工具 - 做复杂游戏必须的进阶功能
+            var mediumPriorityTools = new HashSet<string>
+            {
+                "duplicate_gameobject", "set_parent", "get_gameobject_info", "list_components",
+                "set_material_properties", "set_renderer_properties", "set_light_properties",
+                "set_rigidbody_properties", "add_force", "set_collider_properties", "raycast",
+                "play_audio", "stop_audio", "set_audio_properties",
+                "create_prefab", "instantiate_prefab", "list_prefabs", "get_prefab_info",
+                "create_canvas", "create_ui_element", "set_ui_properties",
+                "create_animator", "set_animation_clip", "play_animation",
+                "get_current_scene_info", "get_unity_logs", "clear_unity_logs"
+            };
+            
+            // 低优先级工具 - 做极其复杂游戏必须的高级功能
             var lowPriorityTools = new HashSet<string>
             {
-                "get_thread_stack_info", "get_unity_log_stats", "duplicate_gameobject",
-                "compile_scripts", "get_script_errors", "bind_ui_events",
-                "simulate_input", "create_input_mapping", "create_particle_effect",
-                "import_asset", "create_animation_clip", "set_animation_parameters"
+                "get_thread_stack_info", "get_unity_log_stats",
+                "create_script", "modify_script", "compile_scripts", "get_script_errors",
+                "bind_ui_events", "setup_input_actions", "bind_input_events", "simulate_input", "create_input_mapping",
+                "set_animation_parameters", "create_animation_clip",
+                "create_particle_system", "set_particle_properties", "play_particle_effect", "create_particle_effect",
+                "import_asset", "refresh_assets", "wait_for_compilation",
+                "refresh_editor", "get_editor_status"
             };
             
             if (highPriorityTools.Contains(toolName))
                 return ToolPriority.High;
+            if (mediumPriorityTools.Contains(toolName))
+                return ToolPriority.Medium;
             if (lowPriorityTools.Contains(toolName))
                 return ToolPriority.Low;
-            return ToolPriority.Medium;
+            return ToolPriority.Medium; // 默认为中优先级
         }
         
         // 获取优先级颜色
@@ -177,14 +205,26 @@ namespace Unity.MCP.Editor
             }
         }
         
+        // 获取优先级字体颜色
+        private Color GetPriorityTextColor(ToolPriority priority)
+        {
+            switch (priority)
+            {
+                case ToolPriority.High: return Color.red; // 高优用红色字体
+                case ToolPriority.Medium: return Color.cyan; // 中优用浅蓝色字体
+                case ToolPriority.Low: return Color.white; // 低优用白色字体
+                default: return Color.black;
+            }
+        }
+        
         // 获取优先级标签
         private string GetPriorityLabel(ToolPriority priority)
         {
             switch (priority)
             {
-                case ToolPriority.High: return "[高优]";
-                case ToolPriority.Medium: return "[中优]";
-                case ToolPriority.Low: return "[低优]";
+                case ToolPriority.High: return "[简单游戏必须]";
+                case ToolPriority.Medium: return "[复杂游戏必须]";
+                case ToolPriority.Low: return "[极复杂游戏必须]";
                 default: return "";
             }
         }
@@ -206,9 +246,20 @@ namespace Unity.MCP.Editor
             // 按优先级分组工具
             var toolsByPriority = toolNames
                 .Where(toolName => {
-                    // 文本搜索过滤
-                    var matchesSearch = string.IsNullOrEmpty(_toolSearchFilter) || 
-                                      toolName.ToLower().Contains(_toolSearchFilter.ToLower());
+                    // 文本搜索过滤 - 支持中文名搜索
+                    var matchesSearch = string.IsNullOrEmpty(_toolSearchFilter);
+                    if (!matchesSearch)
+                    {
+                        var searchLower = _toolSearchFilter.ToLower();
+                        // 搜索英文工具名
+                        matchesSearch = toolName.ToLower().Contains(searchLower);
+                        
+                        // 如果英文名不匹配，搜索中文名
+                        if (!matchesSearch && _toolChineseNames.TryGetValue(toolName, out var chineseName))
+                        {
+                            matchesSearch = chineseName.Contains(_toolSearchFilter);
+                        }
+                    }
                     
                     // 优先级过滤
                     var toolPriority = GetToolPriority(toolName);
@@ -243,7 +294,11 @@ namespace Unity.MCP.Editor
                 GUI.backgroundColor = originalColor;
                 
                 var priorityLabel = GetPriorityLabel(priority);
+                var textColor = GetPriorityTextColor(priority);
+                var originalTextColor = GUI.contentColor;
+                GUI.contentColor = textColor;
                 EditorGUILayout.LabelField($"{priorityLabel} ({tools.Length}个工具)", EditorStyles.miniLabel);
+                GUI.contentColor = originalTextColor;
                 
                 // 简单的垂直布局显示工具
                 foreach (var toolName in tools)
@@ -627,12 +682,48 @@ namespace Unity.MCP.Editor
             EditorGUILayout.BeginVertical("box");
             EditorGUILayout.BeginHorizontal();
             
-            // 计算已选择的工具数量
+            // 计算已选择的工具数量 - 基于当前过滤条件
             var allTools = _toolConfig.GetAllRegisteredTools();
-            var enabledCount = allTools.Count(tool => _toolConfig.IsToolEnabled(tool));
-            var totalCount = allTools.Count();
+            var filteredTools = allTools.Where(toolName => {
+                // 文本搜索过滤 - 支持中文名搜索
+                var matchesSearch = string.IsNullOrEmpty(_toolSearchFilter);
+                if (!matchesSearch)
+                {
+                    var searchLower = _toolSearchFilter.ToLower();
+                    // 搜索英文工具名
+                    matchesSearch = toolName.ToLower().Contains(searchLower);
+                    
+                    // 如果英文名不匹配，搜索中文名
+                    if (!matchesSearch && _toolChineseNames.TryGetValue(toolName, out var chineseName))
+                    {
+                        matchesSearch = chineseName.Contains(_toolSearchFilter);
+                    }
+                }
+                
+                // 优先级过滤
+                var toolPriority = GetToolPriority(toolName);
+                var matchesPriority = _priorityFilter == 0 || 
+                                     (_priorityFilter == 1 && toolPriority == ToolPriority.High) ||
+                                     (_priorityFilter == 2 && toolPriority == ToolPriority.Medium) ||
+                                     (_priorityFilter == 3 && toolPriority == ToolPriority.Low);
+                
+                return matchesSearch && matchesPriority;
+            }).ToList();
             
-            GUILayout.Label($"🔨 工具开关配置 (已选择: {enabledCount}/{totalCount})", EditorStyles.boldLabel);
+            var enabledCount = filteredTools.Count(tool => _toolConfig.IsToolEnabled(tool));
+            var totalCount = filteredTools.Count;
+            var allEnabledCount = allTools.Count(tool => _toolConfig.IsToolEnabled(tool));
+            var allTotalCount = allTools.Count();
+            
+            // 显示当前过滤结果和总体统计
+            if (string.IsNullOrEmpty(_toolSearchFilter) && _priorityFilter == 0)
+            {
+                GUILayout.Label($"🔨 工具开关配置 (已选择: {enabledCount}/{totalCount})", EditorStyles.boldLabel);
+            }
+            else
+            {
+                GUILayout.Label($"🔨 工具开关配置 (当前: {enabledCount}/{totalCount}, 总计: {allEnabledCount}/{allTotalCount})", EditorStyles.boldLabel);
+            }
             GUILayout.FlexibleSpace();
             
             if (GUILayout.Button(_showToolConfig ? "隐藏配置" : "显示配置", GUILayout.Width(80)))
@@ -657,7 +748,7 @@ namespace Unity.MCP.Editor
                 
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Label("优先级:", GUILayout.Width(50));
-                var priorityOptions = new string[] { "全部", "高优", "中优", "低优" };
+                var priorityOptions = new string[] { "全部", "简单游戏必须", "复杂游戏必须", "极复杂游戏必须" };
                 _priorityFilter = EditorGUILayout.Popup(_priorityFilter, priorityOptions);
                 EditorGUILayout.EndHorizontal();
                 
@@ -720,6 +811,7 @@ namespace Unity.MCP.Editor
                 DrawToolConfigSection("物理系统工具", new[] { "set_rigidbody_properties", "add_force", "set_collider_properties", "raycast" });
                 DrawToolConfigSection("音频系统工具", new[] { "play_audio", "stop_audio", "set_audio_properties" });
                 DrawToolConfigSection("光照系统工具", new[] { "create_light", "set_light_properties" });
+                DrawToolConfigSection("预制体管理工具", new[] { "create_prefab", "instantiate_prefab", "list_prefabs", "get_prefab_info" });
                 DrawToolConfigSection("脚本管理工具", new[] { "create_script", "modify_script", "get_script_errors" });
                 DrawToolConfigSection("UI系统工具", new[] { "create_canvas", "create_ui_element", "set_ui_properties", "bind_ui_events" });
                 DrawToolConfigSection("动画系统工具", new[] { "create_animator", "set_animation_clip", "play_animation", "set_animation_parameters", "create_animation_clip" });

@@ -942,6 +942,44 @@ namespace Unity.MCP.Editor
                 }), 
                 args => ExecuteOnMainThread(() => UnityToolsMain.SetLightProperties(args)));
                 
+            // 预制体管理系统接口
+            RegisterTool("create_prefab", "Save a GameObject as a prefab", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["gameObjectName"] = new { type = "string", description = "Name of the GameObject to save as prefab" },
+                    ["prefabName"] = new { type = "string", description = "Name for the prefab (optional, defaults to GameObject name + '_Prefab')" },
+                    ["savePath"] = new { type = "string", description = "Path to save the prefab (optional, default: Assets/Prefabs)" },
+                    ["overwrite"] = new { type = "boolean", description = "Whether to overwrite existing prefab (optional, default: false)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.CreatePrefab(args)));
+                
+            RegisterTool("instantiate_prefab", "Instantiate a prefab in the scene", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["prefabPath"] = new { type = "string", description = "Path to the prefab asset" },
+                    ["instanceName"] = new { type = "string", description = "Name for the instantiated object (optional)" },
+                    ["parentName"] = new { type = "string", description = "Name of parent GameObject (optional)" },
+                    ["position"] = new { type = "object", description = "Position {x, y, z} (optional, default: 0,0,0)" },
+                    ["rotation"] = new { type = "object", description = "Rotation {x, y, z} (optional, default: 0,0,0)" },
+                    ["scale"] = new { type = "object", description = "Scale {x, y, z} (optional, default: 1,1,1)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.InstantiatePrefab(args)));
+                
+            RegisterTool("list_prefabs", "List all prefabs in the project", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["searchPath"] = new { type = "string", description = "Path to search for prefabs (optional, default: Assets)" },
+                    ["includeSubfolders"] = new { type = "boolean", description = "Include subfolders in search (optional, default: true)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.ListPrefabs(args)));
+                
+            RegisterTool("get_prefab_info", "Get detailed information about a prefab", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["prefabPath"] = new { type = "string", description = "Path to the prefab asset" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.GetPrefabInfo(args)));
+                
             // 脚本管理系统接口
             RegisterTool("create_script", "Create a new C# script file", 
                 CreateInputSchema(new Dictionary<string, object> 

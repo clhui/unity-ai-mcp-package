@@ -86,6 +86,13 @@ namespace Unity.MCP.Editor
                 new ToolInfo("create_light", "创建光源", new JObject { ["name"] = "TestLight", ["type"] = "Directional" }),
                 new ToolInfo("set_light_properties", "设置光源属性", new JObject { ["gameObject"] = "TestLight", ["properties"] = new JObject { ["intensity"] = 1.5, ["color"] = new JObject { ["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1 } } })
             },
+            ["预制体管理"] = new List<ToolInfo>
+            {
+                new ToolInfo("create_prefab", "创建预制体", new JObject { ["gameObjectName"] = "TestCube", ["prefabName"] = "TestCube_Prefab" }),
+                new ToolInfo("instantiate_prefab", "实例化预制体", new JObject { ["prefabPath"] = "Assets/Prefabs/TestCube_Prefab.prefab", ["position"] = new JObject { ["x"] = 0, ["y"] = 0, ["z"] = 0 } }),
+                new ToolInfo("list_prefabs", "列出预制体", new JObject { ["searchPath"] = "Assets/Prefabs" }),
+                new ToolInfo("get_prefab_info", "获取预制体信息", new JObject { ["prefabPath"] = "Assets/Prefabs/TestCube_Prefab.prefab" })
+            },
             ["资源管理"] = new List<ToolInfo>
             {
                 new ToolInfo("import_asset", "导入资源", new JObject { ["path"] = "Assets/TestAsset.fbx" })

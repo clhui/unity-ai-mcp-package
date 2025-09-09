@@ -183,7 +183,21 @@ namespace Unity.MCP.Editor
                 
                 // 光照系统工具
                 "create_light",
-                "set_light_properties"
+                "set_light_properties",
+                
+                // 预制体管理工具
+                "create_prefab",
+                "instantiate_prefab",
+                "list_prefabs",
+                "get_prefab_info",
+                
+                // 资源管理工具（补充）
+                "refresh_assets",
+                "wait_for_compilation",
+                
+                // 编辑器工具
+                "refresh_editor",
+                "get_editor_status"
             };
         }
         
