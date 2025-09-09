@@ -704,11 +704,13 @@ namespace Unity.MCP.Editor
                 }), 
                 args => ExecuteOnMainThread(() => UnityGameObjectTools.CreateGameObject(args)));
                 
-            RegisterTool("add_component", "Add a component to a GameObject", 
+            RegisterTool("add_component", "Add a component to a GameObject with retry mechanism", 
                 CreateInputSchema(new Dictionary<string, object> 
                 {
                     ["gameObject"] = new { type = "string", description = "Name of the GameObject" },
-                    ["component"] = new { type = "string", description = "Type of component to add" }
+                    ["component"] = new { type = "string", description = "Type of component to add" },
+                    ["maxRetries"] = new { type = "integer", description = "Maximum number of retry attempts (default: 3)", @default = 3 },
+                    ["retryDelay"] = new { type = "integer", description = "Delay between retries in milliseconds (default: 100)", @default = 100 }
                 }), 
                 args => ExecuteOnMainThread(() => UnityComponentTools.AddComponent(args)));
                 
@@ -728,6 +730,28 @@ namespace Unity.MCP.Editor
                     ["path"] = new { type = "string", description = "Path to the asset file" }
                 }), 
                 args => ExecuteOnMainThread(() => UnityToolsMain.ImportAsset(args)));
+                
+            RegisterTool("refresh_assets", "Force refresh Unity asset database", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["importMode"] = new { type = "string", description = "Import mode: normal, force, synchronous", @default = "normal" },
+                    ["forceUpdate"] = new { type = "boolean", description = "Force update all assets", @default = false }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.RefreshAssets(args)));
+                
+            RegisterTool("compile_scripts", "Trigger Unity script compilation", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.CompileScripts(args)));
+                
+            RegisterTool("wait_for_compilation", "Wait for Unity compilation to complete", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["timeout"] = new { type = "integer", description = "Timeout in seconds", @default = 30 },
+                    ["checkInterval"] = new { type = "integer", description = "Check interval in milliseconds", @default = 100 }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.WaitForCompilation(args)));
                 
             // 高级游戏对象操作接口
             RegisterTool("find_gameobject", "Find a GameObject by name or path", 
@@ -1246,6 +1270,26 @@ namespace Unity.MCP.Editor
                          };
                      }));
              }
+             
+             // Unity编辑器工具
+             if (config.IsToolEnabled("refresh_editor"))
+             {
+                 RegisterTool("refresh_editor", "Force refresh Unity Editor interface including Scene view, Hierarchy, Project window, etc.", 
+                     CreateInputSchema(new Dictionary<string, object> 
+                     {
+                         ["refreshType"] = new { type = "string", description = "Type of refresh: all, scene, hierarchy, project, inspector (default: all)" }
+                     }), 
+                     args => ExecuteOnMainThread(() => UnityToolsMain.RefreshEditor(args)));
+             }
+                 
+             if (config.IsToolEnabled("get_editor_status"))
+             {
+                 RegisterTool("get_editor_status", "Get Unity Editor status and interface state information", 
+                     CreateInputSchema(new Dictionary<string, object> 
+                     {
+                     }), 
+                     args => ExecuteOnMainThread(() => UnityToolsMain.GetEditorStatus(args)));
+             }
         }
         
         private void RegisterTool(string name, string description, JObject inputSchema, Func<JObject, McpToolResult> handler)
@@ -1445,7 +1489,7 @@ namespace Unity.MCP.Editor
                     Content = new List<McpContent>
                     {
                         //显示当前是什么操作，并提示大约需要几秒完成操作任务
-                        new McpContent { Type = "text", Text = $"操作 '{operationName}' 已加入异步执行队列，请5秒后重试" }
+                        new McpContent { Type = "text", Text = $"操作 '{operationName}' 已加入异步执行队列，请10秒后重试" }
                     }
                 };
             }

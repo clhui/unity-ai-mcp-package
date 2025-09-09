@@ -78,11 +78,6 @@ namespace Unity.MCP.Tools.Editor
             return UnityScriptTools.ModifyScript(arguments);
         }
         
-        public static McpToolResult CompileScripts(JObject arguments)
-        {
-            return UnityScriptTools.CompileScripts(arguments);
-        }
-        
         public static McpToolResult GetScriptErrors(JObject arguments)
         {
             return UnityScriptTools.GetScriptErrors(arguments);
@@ -622,6 +617,21 @@ namespace Unity.MCP.Tools.Editor
         {
             return UnityAssetTools.ImportAsset(arguments);
         }
+        
+        public static McpToolResult RefreshAssets(JObject arguments)
+        {
+            return UnityAssetTools.RefreshAssets(arguments);
+        }
+        
+        public static McpToolResult CompileScripts(JObject arguments)
+        {
+            return UnityAssetTools.CompileScripts(arguments);
+        }
+        
+        public static McpToolResult WaitForCompilation(JObject arguments)
+        {
+            return UnityAssetTools.WaitForCompilation(arguments);
+        }
         #endregion
 
         #region Audio System - 音频系统
@@ -663,6 +673,30 @@ namespace Unity.MCP.Tools.Editor
         public static string GetBuildInfo(string parameters)
         {
             return Unity.MCP.Editor.UnityBuildTools.GetBuildInfo(parameters);
+        }
+        
+        #endregion
+
+        #region Editor Tools - 编辑器工具
+        
+        /// <summary>
+        /// 强制刷新Unity编辑器界面
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult RefreshEditor(JObject arguments)
+        {
+            return UnityEditorTools.RefreshEditor(arguments);
+        }
+        
+        /// <summary>
+        /// 获取编辑器状态信息
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>编辑器状态信息</returns>
+        public static McpToolResult GetEditorStatus(JObject arguments)
+        {
+            return UnityEditorTools.GetEditorStatus(arguments);
         }
         
         #endregion

@@ -21,6 +21,8 @@ namespace Unity.MCP.Editor
         {
             var gameObjectName = arguments["gameObject"]?.ToString();
             var componentType = arguments["component"]?.ToString();
+            var maxRetries = arguments["maxRetries"]?.ToObject<int>() ?? 3;
+            var retryDelay = arguments["retryDelay"]?.ToObject<int>() ?? 100;
             
             if (string.IsNullOrEmpty(gameObjectName) || string.IsNullOrEmpty(componentType))
             {
@@ -34,61 +36,226 @@ namespace Unity.MCP.Editor
                 };
             }
             
-            try
+            var errors = new List<string>();
+            
+            for (int attempt = 0; attempt < maxRetries; attempt++)
             {
-                var go = GameObject.Find(gameObjectName);
-                if (go == null)
+                try
                 {
-                    return new McpToolResult
+                    // 查找游戏对象，支持多种查找方式
+                    GameObject go = FindGameObjectWithFallback(gameObjectName);
+                    
+                    if (go == null)
                     {
-                        Content = new List<McpContent>
+                        var error = $"GameObject not found: {gameObjectName} (attempt {attempt + 1}/{maxRetries})";
+                        errors.Add(error);
+                        
+                        if (attempt < maxRetries - 1)
                         {
-                            new McpContent { Type = "text", Text = $"GameObject not found: {gameObjectName}" }
-                        },
-                        IsError = true
-                    };
-                }
-                
-                var type = Type.GetType($"UnityEngine.{componentType}, UnityEngine") ?? 
-                          Type.GetType($"UnityEngine.{componentType}, UnityEngine.CoreModule");
-                
-                if (type == null)
-                {
-                    return new McpToolResult
-                    {
-                        Content = new List<McpContent>
+                            System.Threading.Thread.Sleep(retryDelay);
+                            continue;
+                        }
+                        
+                        return new McpToolResult
                         {
-                            new McpContent { Type = "text", Text = $"Component type not found: {componentType}" }
-                        },
-                        IsError = true
-                    };
-                }
-                
-                var component = go.AddComponent(type);
-                
-#if UNITY_EDITOR
-                Undo.RegisterCreatedObjectUndo(component, "Add Component");
-#endif
-                
-                return new McpToolResult
-                {
-                    Content = new List<McpContent>
-                    {
-                        new McpContent { Type = "text", Text = $"Added component {componentType} to {gameObjectName}" }
+                            Content = new List<McpContent>
+                            {
+                                new McpContent { Type = "text", Text = $"GameObject not found after {maxRetries} attempts: {gameObjectName}\nErrors: {string.Join("; ", errors)}" }
+                            },
+                            IsError = true
+                        };
                     }
-                };
-            }
-            catch (Exception ex)
-            {
-                return new McpToolResult
-                {
-                    Content = new List<McpContent>
+                    
+                    // 检查组件是否已存在
+                    Type componentTypeObj = ResolveComponentType(componentType);
+                    if (componentTypeObj == null)
                     {
-                        new McpContent { Type = "text", Text = $"Failed to add component: {ex.Message}" }
-                    },
-                    IsError = true
-                };
+                        return new McpToolResult
+                        {
+                            Content = new List<McpContent>
+                            {
+                                new McpContent { Type = "text", Text = $"Component type not found: {componentType}. Available types include: Transform, Rigidbody, Collider, MeshRenderer, etc." }
+                            },
+                            IsError = true
+                        };
+                    }
+                    
+                    // 检查是否已有该组件
+                    if (go.GetComponent(componentTypeObj) != null)
+                    {
+                        return new McpToolResult
+                        {
+                            Content = new List<McpContent>
+                            {
+                                new McpContent { Type = "text", Text = $"Component {componentType} already exists on {gameObjectName}" }
+                            },
+                            IsError = false
+                        };
+                    }
+                    
+                    // 添加组件
+                    var component = go.AddComponent(componentTypeObj);
+                    
+#if UNITY_EDITOR
+                    Undo.RegisterCreatedObjectUndo(component, "Add Component");
+                    EditorUtility.SetDirty(go);
+#endif
+                    
+                    return new McpToolResult
+                    {
+                        Content = new List<McpContent>
+                        {
+                            new McpContent { Type = "text", Text = $"Successfully added component {componentType} to {gameObjectName} (attempt {attempt + 1})" }
+                        }
+                    };
+                }
+                catch (Exception ex)
+                {
+                    var error = $"Attempt {attempt + 1}: {ex.Message}";
+                    errors.Add(error);
+                    
+                    if (attempt < maxRetries - 1)
+                    {
+                        System.Threading.Thread.Sleep(retryDelay);
+                        continue;
+                    }
+                    
+                    return new McpToolResult
+                    {
+                        Content = new List<McpContent>
+                        {
+                            new McpContent { Type = "text", Text = $"Failed to add component after {maxRetries} attempts: {componentType}\nErrors: {string.Join("; ", errors)}" }
+                        },
+                        IsError = true
+                    };
+                }
             }
+            
+            return new McpToolResult
+            {
+                Content = new List<McpContent>
+                {
+                    new McpContent { Type = "text", Text = $"Unexpected error: Failed to add component {componentType} to {gameObjectName}" }
+                },
+                IsError = true
+            };
+        }
+        
+        /// <summary>
+        /// 使用多种方式查找游戏对象
+        /// </summary>
+        private static GameObject FindGameObjectWithFallback(string name)
+        {
+            // 1. 直接按名称查找
+            var go = GameObject.Find(name);
+            if (go != null) return go;
+            
+            // 2. 查找包含非活动对象
+            var allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            go = allObjects.FirstOrDefault(obj => obj.name == name && obj.scene.isLoaded);
+            if (go != null) return go;
+            
+            // 3. 模糊匹配
+            go = allObjects.FirstOrDefault(obj => obj.name.Contains(name) && obj.scene.isLoaded);
+            if (go != null) return go;
+            
+            return null;
+        }
+        
+        /// <summary>
+        /// 解析组件类型，支持多种命名方式
+        /// </summary>
+        private static Type ResolveComponentType(string componentType)
+        {
+            // 常见组件类型映射
+            var typeMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "rigidbody", "Rigidbody" },
+                { "collider", "BoxCollider" },
+                { "boxcollider", "BoxCollider" },
+                { "spherecollider", "SphereCollider" },
+                { "capsulecollider", "CapsuleCollider" },
+                { "meshcollider", "MeshCollider" },
+                { "renderer", "MeshRenderer" },
+                { "meshrenderer", "MeshRenderer" },
+                { "light", "Light" },
+                { "camera", "Camera" },
+                { "audiosource", "AudioSource" },
+                { "animator", "Animator" },
+                { "canvas", "Canvas" },
+                { "button", "Button" },
+                { "text", "Text" },
+                { "image", "Image" }
+            };
+            
+            // 使用映射表查找
+            if (typeMap.TryGetValue(componentType, out string mappedType))
+            {
+                componentType = mappedType;
+            }
+            
+            // 1. 首先尝试直接按类型名查找（支持用户自定义脚本）
+            var allAssemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in allAssemblies)
+            {
+                try
+                {
+                    var type = assembly.GetType(componentType);
+                    if (type != null && typeof(Component).IsAssignableFrom(type))
+                    {
+                        return type;
+                    }
+                    
+                    // 也尝试在程序集中搜索所有类型
+                    var types = assembly.GetTypes();
+                    foreach (var t in types)
+                    {
+                        if (t.Name.Equals(componentType, StringComparison.OrdinalIgnoreCase) && 
+                            typeof(Component).IsAssignableFrom(t))
+                        {
+                            return t;
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // 忽略无法访问的程序集
+                    continue;
+                }
+            }
+            
+            // 2. 尝试Unity内置命名空间
+            var namespaces = new[]
+            {
+                "UnityEngine",
+                "UnityEngine.UI",
+                "UnityEngine.Audio",
+                "UnityEngine.Rendering"
+            };
+            
+            var unityAssemblies = new[]
+            {
+                "UnityEngine",
+                "UnityEngine.CoreModule",
+                "UnityEngine.UIModule",
+                "UnityEngine.AudioModule",
+                "UnityEngine.PhysicsModule"
+            };
+            
+            foreach (var ns in namespaces)
+            {
+                foreach (var assembly in unityAssemblies)
+                {
+                    var fullTypeName = $"{ns}.{componentType}, {assembly}";
+                    var type = Type.GetType(fullTypeName);
+                    if (type != null && typeof(Component).IsAssignableFrom(type))
+                    {
+                        return type;
+                    }
+                }
+            }
+            
+            return null;
         }
         
         public static McpToolResult GetComponentProperties(JObject arguments)

@@ -541,11 +541,30 @@ namespace Unity.MCP.Editor
                 {
                     try
                     {
-                        EditorApplication.QueuePlayerLoopUpdate();
-                        // 强制触发update回调来处理队列
-                        if (EditorApplication.update != null)
+                        // 只在主线程中调用Unity API
+                        bool isCurrentMainThread = false;
+                        try
                         {
-                            EditorApplication.update.Invoke();
+                            isCurrentMainThread = UnityEditorInternal.InternalEditorUtility.CurrentThreadIsMainThread();
+                        }
+                        catch
+                        {
+                            isCurrentMainThread = System.Threading.Thread.CurrentThread.ManagedThreadId == _mainThreadId;
+                        }
+                        
+                        if (isCurrentMainThread)
+                        {
+                            EditorApplication.QueuePlayerLoopUpdate();
+                            // 强制触发update回调来处理队列
+                            if (EditorApplication.update != null)
+                            {
+                                EditorApplication.update.Invoke();
+                            }
+                        }
+                        else
+                        {
+                            // 非主线程只能等待，不能强制处理
+                            McpLogger.LogDebug($"非主线程等待队列处理，当前线程ID: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
                         }
                     }
                     catch (Exception ex)

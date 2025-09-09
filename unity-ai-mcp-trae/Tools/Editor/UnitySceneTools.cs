@@ -206,6 +206,19 @@ namespace Unity.MCP.Tools.Editor
         public static McpToolResult OpenScene(JObject arguments)
         {
 #if UNITY_EDITOR
+            // 检查Play模式
+            if (EditorApplication.isPlaying)
+            {
+                return new McpToolResult
+                {
+                    Content = new List<McpContent>
+                    {
+                        new McpContent { Type = "text", Text = "⚠️ 无法在Play模式下打开场景！请先停止Play模式再进行场景操作。\n提示：点击Unity编辑器中的停止按钮或使用play_mode_stop工具停止Play模式。" }
+                    },
+                    IsError = true
+                };
+            }
+            
             var scenePath = arguments["path"]?.ToString();
             if (string.IsNullOrEmpty(scenePath))
             {

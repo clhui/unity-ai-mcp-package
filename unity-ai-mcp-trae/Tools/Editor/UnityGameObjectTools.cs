@@ -16,8 +16,34 @@ namespace Unity.MCP.Editor
     /// </summary>
     public static class UnityGameObjectTools
     {
+        /// <summary>
+        /// 检查是否处于Play模式，如果是则返回警告信息
+        /// </summary>
+        /// <returns>如果处于Play模式返回错误结果，否则返回null</returns>
+        private static McpToolResult CheckPlayModeForEditing()
+        {
+#if UNITY_EDITOR
+            if (EditorApplication.isPlaying)
+            {
+                return new McpToolResult
+                {
+                    Content = new List<McpContent>
+                    {
+                        new McpContent { Type = "text", Text = "⚠️ 无法在Play模式下编辑场景！请先停止Play模式再进行场景编辑操作。\n提示：点击Unity编辑器中的停止按钮或使用play_mode_stop工具停止Play模式。" }
+                    },
+                    IsError = true
+                };
+            }
+#endif
+            return null;
+        }
+
         public static McpToolResult CreateGameObject(JObject arguments)
         {
+            // 检查Play模式
+            var playModeCheck = CheckPlayModeForEditing();
+            if (playModeCheck != null) return playModeCheck;
+            
             var name = arguments["name"]?.ToString() ?? "GameObject";
             var parentPath = arguments["parent"]?.ToString();
             
@@ -62,6 +88,10 @@ namespace Unity.MCP.Editor
         
         public static McpToolResult AddComponent(JObject arguments)
         {
+            // 检查Play模式
+            var playModeCheck = CheckPlayModeForEditing();
+            if (playModeCheck != null) return playModeCheck;
+            
             var gameObjectName = arguments["gameObject"]?.ToString();
             var componentType = arguments["component"]?.ToString();
             
@@ -198,6 +228,10 @@ namespace Unity.MCP.Editor
         
         public static McpToolResult DeleteGameObject(JObject arguments)
         {
+            // 检查Play模式
+            var playModeCheck = CheckPlayModeForEditing();
+            if (playModeCheck != null) return playModeCheck;
+            
             var name = arguments["name"]?.ToString();
             
             if (string.IsNullOrEmpty(name))
@@ -256,6 +290,10 @@ namespace Unity.MCP.Editor
         
         public static McpToolResult DuplicateGameObject(JObject arguments)
         {
+            // 检查Play模式
+            var playModeCheck = CheckPlayModeForEditing();
+            if (playModeCheck != null) return playModeCheck;
+            
             var name = arguments["name"]?.ToString();
             var newName = arguments["newName"]?.ToString();
             
@@ -324,6 +362,10 @@ namespace Unity.MCP.Editor
         
         public static McpToolResult SetParent(JObject arguments)
         {
+            // 检查Play模式
+            var playModeCheck = CheckPlayModeForEditing();
+            if (playModeCheck != null) return playModeCheck;
+            
             var childName = arguments["child"]?.ToString();
             var parentName = arguments["parent"]?.ToString();
             var worldPositionStays = arguments["worldPositionStays"]?.ToObject<bool>() ?? true;
@@ -476,6 +518,10 @@ namespace Unity.MCP.Editor
         
         public static McpToolResult RemoveComponent(JObject arguments)
         {
+            // 检查Play模式
+            var playModeCheck = CheckPlayModeForEditing();
+            if (playModeCheck != null) return playModeCheck;
+            
             var gameObjectName = arguments["gameObject"]?.ToString();
             var componentType = arguments["component"]?.ToString();
             

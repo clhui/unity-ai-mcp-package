@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace Unity.MCP.Editor
 {
@@ -115,7 +116,10 @@ namespace Unity.MCP.Editor
             ["create_particle_effect"] = "创建粒子效果",
             
             // 资源管理工具
-            ["import_asset"] = "导入资源"
+            ["import_asset"] = "导入资源",
+            ["refresh_assets"] = "刷新资源数据库",
+            ["compile_scripts"] = "编译脚本",
+            ["wait_for_compilation"] = "等待编译完成"
         };
         private bool _showToolConfig = false;
         private McpToolConfig _toolConfig;
@@ -309,13 +313,31 @@ namespace Unity.MCP.Editor
             
             // 读取版本号
             LoadVersion();
-            StartServer();
+            
             // 监听播放模式状态变化
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             
             // 监听场景变化
             EditorSceneManager.activeSceneChangedInEditMode += OnActiveSceneChanged;
             EditorSceneManager.sceneOpened += OnSceneOpened;
+            
+            // 检查是否需要恢复服务器状态
+            bool wasRunning = EditorPrefs.GetBool("McpServer.WasRunning", false);
+            if (_autoStart || wasRunning)
+            {
+                McpLogger.LogDebug($"OnEnable: 准备启动MCP服务器 (AutoStart: {_autoStart}, WasRunning: {wasRunning})");
+                // 延迟启动，确保Unity编辑器完全初始化
+                EditorApplication.delayCall += () => {
+                    if (this != null) // 确保窗口仍然存在
+                    {
+                        StartServerWithRetry();
+                        if (wasRunning)
+                        {
+                            EditorPrefs.SetBool("McpServer.WasRunning", false); // 清除标记
+                        }
+                    }
+                };
+            }
         }
         
         private void OnDisable()
@@ -438,6 +460,18 @@ namespace Unity.MCP.Editor
                 McpLogger.IsDebugEnabled = newDebugMode;
                 EditorPrefs.SetBool("McpServer.DebugMode", newDebugMode);
             }
+            
+            // 测试按钮区域
+            EditorGUILayout.BeginHorizontal();
+            
+            if (GUILayout.Button("测试服务器恢复", GUILayout.Width(120)))
+            {
+                TestServerRecovery();
+            }
+            
+            // 测试日志获取功能已移除
+            // 测试日志查询功能已移除
+            EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
             
@@ -467,6 +501,14 @@ namespace Unity.MCP.Editor
         {
             EditorGUILayout.BeginVertical("box");
             GUILayout.Label("⚙️ 客户端配置", EditorStyles.boldLabel);
+            
+            // 检查服务器是否已初始化
+            if (_server == null)
+            {
+                EditorGUILayout.HelpBox("请先启动MCP服务器以查看配置信息", MessageType.Info);
+                EditorGUILayout.EndVertical();
+                return;
+            }
             
             var configJson = $@"{{
   ""mcpServers"": {{
@@ -678,12 +720,13 @@ namespace Unity.MCP.Editor
                 DrawToolConfigSection("物理系统工具", new[] { "set_rigidbody_properties", "add_force", "set_collider_properties", "raycast" });
                 DrawToolConfigSection("音频系统工具", new[] { "play_audio", "stop_audio", "set_audio_properties" });
                 DrawToolConfigSection("光照系统工具", new[] { "create_light", "set_light_properties" });
-                DrawToolConfigSection("脚本管理工具", new[] { "create_script", "modify_script", "compile_scripts", "get_script_errors" });
+                DrawToolConfigSection("脚本管理工具", new[] { "create_script", "modify_script", "get_script_errors" });
                 DrawToolConfigSection("UI系统工具", new[] { "create_canvas", "create_ui_element", "set_ui_properties", "bind_ui_events" });
                 DrawToolConfigSection("动画系统工具", new[] { "create_animator", "set_animation_clip", "play_animation", "set_animation_parameters", "create_animation_clip" });
                 DrawToolConfigSection("输入系统工具", new[] { "setup_input_actions", "bind_input_events", "simulate_input", "create_input_mapping" });
                 DrawToolConfigSection("粒子系统工具", new[] { "create_particle_system", "set_particle_properties", "play_particle_effect", "create_particle_effect" });
-                DrawToolConfigSection("资源管理工具", new[] { "import_asset" });
+                DrawToolConfigSection("资源管理工具", new[] { "import_asset", "refresh_assets", "compile_scripts", "wait_for_compilation" });
+                DrawToolConfigSection("编辑器工具", new[] { "refresh_editor", "get_editor_status" });
                 
                 EditorGUILayout.EndScrollView();
                 
@@ -751,6 +794,63 @@ namespace Unity.MCP.Editor
         }
         
         /// <summary>
+        /// 带重试机制的服务器启动方法
+        /// </summary>
+        private void StartServerWithRetry(int maxRetries = 3)
+        {
+            if (_server?.IsRunning == true) 
+            {
+                return;
+            }
+            
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    // 确保之前的服务器实例已清理
+                    if (_server != null)
+                    {
+                        try { _server.Stop(); } catch { }
+                        _server = null;
+                    }
+                    
+                    // 创建新的服务器实例
+                    _server = new McpServer(_port);
+                    
+                    // 启动服务器
+                    _server.Start();
+                    
+                    // 验证服务器是否真正启动
+                    if (_server.IsRunning)
+                    {
+                        McpLogger.LogTool($"MCP服务器启动成功，端口: {_port} (尝试 {attempt}/{maxRetries})");
+                        return;
+                    }
+                    else
+                    {
+                        McpLogger.LogDebug($"MCP服务器启动失败，服务器未运行 (尝试 {attempt}/{maxRetries})");
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    McpLogger.LogDebug($"MCP服务器启动异常 (尝试 {attempt}/{maxRetries}): {ex.Message}");
+                    
+                    if (attempt == maxRetries)
+                    {
+                        // 最后一次尝试失败，显示错误对话框
+                        EditorUtility.DisplayDialog("错误", $"启动MCP服务器失败 (已尝试 {maxRetries} 次): {ex.Message}", "确定");
+                    }
+                }
+                
+                // 如果不是最后一次尝试，等待一段时间再重试
+                if (attempt < maxRetries)
+                {
+                    System.Threading.Thread.Sleep(1000); // 等待1秒
+                }
+            }
+        }
+        
+        /// <summary>
         /// 静态方法用于外部启动服务器
         /// </summary>
         public static void StartServerStatic()
@@ -774,6 +874,8 @@ namespace Unity.MCP.Editor
                     {
                         //打印服务器状态
                         McpLogger.LogDebug($"退出编辑模式，服务器状态: {_server?.IsRunning}");
+                        // 记录服务器之前是否在运行，以便后续恢复
+                        EditorPrefs.SetBool("McpServer.WasRunning", true);
                         StopServer();
                     }
                     break;
@@ -784,16 +886,20 @@ namespace Unity.MCP.Editor
                     {
                         //打印服务器状态
                         McpLogger.LogDebug($"退出播放模式，服务器状态: {_server?.IsRunning}");
+                        // 记录服务器之前是否在运行，以便后续恢复
+                        EditorPrefs.SetBool("McpServer.WasRunning", true);
                         StopServer();
                     }
                     break;
                     
                 case PlayModeStateChange.EnteredEditMode:
                     _isPlayModeTransition = false;
-                    if (_autoStart ) {
-                        Debug.Log($"[McpServerWindow] 进入编辑模式: ，自动启动MCP服务器");
-                        StopServer();
-                        StartServer();
+                    // 检查是否需要恢复服务器运行状态
+                    bool wasRunning = EditorPrefs.GetBool("McpServer.WasRunning", false);
+                    if (_autoStart || wasRunning) {
+                        Debug.Log($"[McpServerWindow] 进入编辑模式，自动启动MCP服务器 (AutoStart: {_autoStart}, WasRunning: {wasRunning})");
+                        StartServerWithRetry();
+                        EditorPrefs.SetBool("McpServer.WasRunning", false); // 清除标记
                     }
                     //打印服务器状态
                     McpLogger.LogDebug($"进入编辑模式，服务器状态: {_server?.IsRunning}");
@@ -801,10 +907,12 @@ namespace Unity.MCP.Editor
                     
                 case PlayModeStateChange.EnteredPlayMode:
                     _isPlayModeTransition = false;
-                    if (_autoStart) {
-                        McpLogger.LogTool("进入播放模式，自动启动MCP服务器");
-                        StopServer();
-                        StartServer();
+                    // 检查是否需要恢复服务器运行状态
+                    bool wasRunningInPlay = EditorPrefs.GetBool("McpServer.WasRunning", false);
+                    if (_autoStart || wasRunningInPlay) {
+                        McpLogger.LogTool($"进入播放模式，自动启动MCP服务器 (AutoStart: {_autoStart}, WasRunning: {wasRunningInPlay})");
+                        StartServerWithRetry();
+                        EditorPrefs.SetBool("McpServer.WasRunning", false); // 清除标记
                     }
                     //打印服务器状态
                     McpLogger.LogDebug($"进入播放模式，服务器状态: {_server?.IsRunning}");
@@ -915,27 +1023,28 @@ namespace Unity.MCP.Editor
         {
             try
             {
-                // 获取程序集定义文件路径
-                var asmdefPath = System.IO.Path.Combine(Application.dataPath.Replace("/Assets", ""), "Assets", "Editor", "Unity.MCP.Editor.asmdef");
+                // 获取package.json文件路径
+                var packageJsonPath = System.IO.Path.Combine(Application.dataPath.Replace("/Assets", ""), "package.json");
                 
                 // 如果在Packages目录中，尝试其他路径
-                if (!System.IO.File.Exists(asmdefPath))
+                if (!System.IO.File.Exists(packageJsonPath))
                 {
-                    var packagePath = "Packages/com.clh.unity-mcp/Editor/Unity.MCP.Editor.asmdef";
-                    asmdefPath = System.IO.Path.Combine(Application.dataPath.Replace("/Assets", ""), packagePath);
+                    var packagePath = "Packages/com.unity.ai-mcp-trae/package.json";
+                    packageJsonPath = System.IO.Path.Combine(Application.dataPath.Replace("/Assets", ""), packagePath);
                 }
                 
                 // 如果还是找不到，尝试相对于当前脚本的路径
-                if (!System.IO.File.Exists(asmdefPath))
+                if (!System.IO.File.Exists(packageJsonPath))
                 {
                     var scriptPath = new System.Diagnostics.StackTrace(true).GetFrame(0).GetFileName();
                     var scriptDir = System.IO.Path.GetDirectoryName(scriptPath);
-                    asmdefPath = System.IO.Path.Combine(scriptDir, "Unity.MCP.Editor.asmdef");
+                    var parentDir = System.IO.Path.GetDirectoryName(scriptDir); // 上一级目录
+                    packageJsonPath = System.IO.Path.Combine(parentDir, "package.json");
                 }
                 
-                if (System.IO.File.Exists(asmdefPath))
+                if (System.IO.File.Exists(packageJsonPath))
                 {
-                    var json = System.IO.File.ReadAllText(asmdefPath);
+                    var json = System.IO.File.ReadAllText(packageJsonPath);
                     
                     // 简单的JSON解析获取版本号
                     var versionMatch = System.Text.RegularExpressions.Regex.Match(json, @"""version""\s*:\s*""([^""]+)""");
@@ -955,7 +1064,7 @@ namespace Unity.MCP.Editor
             }
             catch (System.Exception ex)
             {
-                _version = "错误";
+                _version = "错误: " + ex.Message;
             }
         }
         
@@ -1044,5 +1153,66 @@ namespace Unity.MCP.Editor
                 throw new System.Exception($"更新配置文件失败: {ex.Message}");
             }
         }
+        
+        // TestLogQuery 测试日志查询功能已移除
+        
+        /// <summary>
+        /// 测试服务器恢复功能
+        /// </summary>
+        private void TestServerRecovery()
+        {
+            try
+            {
+                McpLogger.LogDebug("开始测试服务器恢复功能");
+                
+                bool wasRunning = _server?.IsRunning == true;
+                string statusBefore = wasRunning ? "运行中" : "已停止";
+                
+                McpLogger.LogDebug($"测试前服务器状态: {statusBefore}");
+                Debug.Log($"[服务器恢复测试] 测试前状态: {statusBefore}");
+                
+                // 模拟服务器停止和恢复过程
+                if (wasRunning)
+                {
+                    McpLogger.LogDebug("停止服务器以测试恢复功能");
+                    Debug.Log("[服务器恢复测试] 停止服务器以测试恢复功能");
+                    StopServer();
+                    
+                    // 设置恢复标记
+                    EditorPrefs.SetBool("McpServer.WasRunning", true);
+                    
+                    // 等待一小段时间
+                    System.Threading.Thread.Sleep(500);
+                    
+                    McpLogger.LogDebug("尝试恢复服务器");
+                    Debug.Log("[服务器恢复测试] 尝试恢复服务器");
+                    StartServerWithRetry();
+                    
+                    // 清除恢复标记
+                    EditorPrefs.SetBool("McpServer.WasRunning", false);
+                }
+                else
+                {
+                    McpLogger.LogDebug("服务器未运行，测试启动功能");
+                    Debug.Log("[服务器恢复测试] 服务器未运行，测试启动功能");
+                    StartServerWithRetry();
+                }
+                
+                string statusAfter = _server?.IsRunning == true ? "运行中" : "已停止";
+                McpLogger.LogDebug($"测试后服务器状态: {statusAfter}");
+                Debug.Log($"[服务器恢复测试] 测试后状态: {statusAfter}");
+                
+                string message = $"服务器恢复测试完成\n测试前状态: {statusBefore}\n测试后状态: {statusAfter}";
+                EditorUtility.DisplayDialog("测试完成", message, "确定");
+            }
+            catch (System.Exception ex)
+            {
+                McpLogger.LogError($"测试服务器恢复失败: {ex.Message}");
+                Debug.LogError($"[服务器恢复测试] 失败: {ex.Message}");
+                EditorUtility.DisplayDialog("测试失败", $"服务器恢复测试失败: {ex.Message}", "确定");
+            }
+        }
+        
+        // TestGetUnityLogs 测试功能已移除
     }
 }

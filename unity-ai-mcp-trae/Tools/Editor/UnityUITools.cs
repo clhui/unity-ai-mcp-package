@@ -16,8 +16,34 @@ namespace Unity.MCP.Editor
     /// </summary>
     public static class UnityUITools
     {
+        /// <summary>
+        /// 检查是否处于Play模式，如果是则返回警告信息
+        /// </summary>
+        /// <returns>如果处于Play模式返回错误结果，否则返回null</returns>
+        private static McpToolResult CheckPlayModeForEditing()
+        {
+#if UNITY_EDITOR
+            if (EditorApplication.isPlaying)
+            {
+                return new McpToolResult
+                {
+                    Content = new List<McpContent>
+                    {
+                        new McpContent { Type = "text", Text = "⚠️ 无法在Play模式下编辑UI！请先停止Play模式再进行UI编辑操作。\n提示：点击Unity编辑器中的停止按钮或使用play_mode_stop工具停止Play模式。" }
+                    },
+                    IsError = true
+                };
+            }
+#endif
+            return null;
+        }
+
         public static McpToolResult CreateCanvas(JObject arguments)
         {
+            // 检查Play模式
+            var playModeCheck = CheckPlayModeForEditing();
+            if (playModeCheck != null) return playModeCheck;
+            
             var canvasName = arguments["canvasName"]?.ToString() ?? "Canvas";
             var renderMode = arguments["renderMode"]?.ToString() ?? "ScreenSpaceOverlay";
             var sortingOrder = arguments["sortingOrder"]?.ToObject<int>() ?? 0;
@@ -83,6 +109,10 @@ namespace Unity.MCP.Editor
         
         public static McpToolResult CreateUIElement(JObject arguments)
         {
+            // 检查Play模式
+            var playModeCheck = CheckPlayModeForEditing();
+            if (playModeCheck != null) return playModeCheck;
+            
             var elementName = arguments["elementName"]?.ToString();
             var elementType = arguments["elementType"]?.ToString();
             var parentName = arguments["parentName"]?.ToString();
