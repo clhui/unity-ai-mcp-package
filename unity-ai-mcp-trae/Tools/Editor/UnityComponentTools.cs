@@ -657,9 +657,9 @@ namespace Unity.MCP.Editor
                     };
                 }
 
-                // 查找并移除组件
-                Component component = go.GetComponent(type);
-                if (component == null)
+                // 查找并移除组件 - 只删除第一个匹配的组件
+                Component[] components = go.GetComponents(type);
+                if (components == null || components.Length == 0)
                 {
                     return new McpToolResult
                     {
@@ -671,19 +671,30 @@ namespace Unity.MCP.Editor
                     };
                 }
 
+                // 只删除第一个找到的组件
+                Component componentToRemove = components[0];
+                
 #if UNITY_EDITOR
                 // 在编辑器中注册撤销操作
-                Undo.DestroyObjectImmediate(component);
+                Undo.DestroyObjectImmediate(componentToRemove);
 #else
                 // 在运行时销毁组件
-                UnityEngine.Object.DestroyImmediate(component);
+                UnityEngine.Object.DestroyImmediate(componentToRemove);
 #endif
+                
+                // 如果还有其他相同类型的组件，在结果中提示
+                int remainingCount = components.Length - 1;
+                string resultMessage = $"Successfully removed one {componentType} from {gameObjectName}";
+                if (remainingCount > 0)
+                {
+                    resultMessage += $" (还有 {remainingCount} 个相同类型的组件)";
+                }
 
                 return new McpToolResult
                 {
                     Content = new List<McpContent>
                     {
-                        new McpContent { Type = "text", Text = $"Successfully removed {componentType} from {gameObjectName}" }
+                        new McpContent { Type = "text", Text = resultMessage }
                     }
                 };
             }

@@ -91,7 +91,26 @@ namespace Unity.MCP.Editor
                 new ToolInfo("create_prefab", "创建预制体", new JObject { ["gameObjectName"] = "TestCube", ["prefabName"] = "TestCube_Prefab" }),
                 new ToolInfo("instantiate_prefab", "实例化预制体", new JObject { ["prefabPath"] = "Assets/Prefabs/TestCube_Prefab.prefab", ["position"] = new JObject { ["x"] = 0, ["y"] = 0, ["z"] = 0 } }),
                 new ToolInfo("list_prefabs", "列出预制体", new JObject { ["searchPath"] = "Assets/Prefabs" }),
-                new ToolInfo("get_prefab_info", "获取预制体信息", new JObject { ["prefabPath"] = "Assets/Prefabs/TestCube_Prefab.prefab" })
+                new ToolInfo("get_prefab_info", "获取预制体信息", new JObject { ["prefabPath"] = "Assets/Prefabs/TestCube_Prefab.prefab" }),
+                new ToolInfo("delete_prefab", "删除预制体", new JObject { ["prefabPath"] = "Assets/Prefabs/TestCube_Prefab.prefab", ["confirmDelete"] = true })
+            },
+            ["几何体管理"] = new List<ToolInfo>
+            {
+                new ToolInfo("create_geometry", "创建几何体", new JObject { ["geometryType"] = "Cube", ["name"] = "TestCube", ["position"] = new JObject { ["x"] = 0, ["y"] = 0, ["z"] = 0 }, ["scale"] = new JObject { ["x"] = 1, ["y"] = 1, ["z"] = 1 } }),
+                new ToolInfo("create_custom_mesh", "创建自定义网格", new JObject { ["meshType"] = "Triangle", ["name"] = "TestTriangle", ["position"] = new JObject { ["x"] = 0, ["y"] = 0, ["z"] = 0 } })
+            },
+            ["环境管理"] = new List<ToolInfo>
+            {
+                new ToolInfo("set_background_color", "设置背景色", new JObject { ["color"] = new JObject { ["r"] = 0.5f, ["g"] = 0.7f, ["b"] = 1.0f, ["a"] = 1.0f } }),
+                new ToolInfo("set_skybox", "设置天空盒", new JObject { ["skyboxMaterial"] = "Default-Skybox" }),
+                new ToolInfo("set_fog", "设置雾效", new JObject { ["enabled"] = true, ["color"] = new JObject { ["r"] = 0.5f, ["g"] = 0.5f, ["b"] = 0.5f, ["a"] = 1.0f }, ["mode"] = "Linear", ["startDistance"] = 10.0f, ["endDistance"] = 100.0f }),
+                new ToolInfo("set_ambient_light", "设置环境光", new JObject { ["color"] = new JObject { ["r"] = 0.2f, ["g"] = 0.2f, ["b"] = 0.2f, ["a"] = 1.0f }, ["intensity"] = 1.0f })
+            },
+            ["相机管理"] = new List<ToolInfo>
+            {
+                new ToolInfo("set_camera_properties", "设置相机属性", new JObject { ["cameraName"] = "Main Camera", ["fieldOfView"] = 60.0f, ["nearClipPlane"] = 0.3f, ["farClipPlane"] = 1000.0f }),
+                new ToolInfo("get_camera_properties", "获取相机属性", new JObject { ["cameraName"] = "Main Camera" }),
+                new ToolInfo("create_camera", "创建相机", new JObject { ["name"] = "SecondCamera", ["position"] = new JObject { ["x"] = 5, ["y"] = 5, ["z"] = 5 }, ["fieldOfView"] = 45.0f })
             },
             ["资源管理"] = new List<ToolInfo>
             {

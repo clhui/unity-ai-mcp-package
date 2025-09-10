@@ -190,6 +190,22 @@ namespace Unity.MCP.Editor
                 "instantiate_prefab",
                 "list_prefabs",
                 "get_prefab_info",
+                "delete_prefab",
+                
+                // 几何体管理工具
+                "create_geometry",
+                "create_custom_mesh",
+                
+                // 环境管理工具
+                "set_background_color",
+                "set_skybox",
+                "set_fog",
+                "set_ambient_light",
+                
+                // 相机管理工具
+                "set_camera_properties",
+                "get_camera_properties",
+                "create_camera",
                 
                 // 资源管理工具（补充）
                 "refresh_assets",

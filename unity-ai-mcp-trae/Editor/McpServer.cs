@@ -684,7 +684,10 @@ namespace Unity.MCP.Editor
             if (config.IsToolEnabled("get_current_scene_info"))
             {
                 RegisterTool("get_current_scene_info", "Get detailed information about the current active scene", 
-                    CreateInputSchema(new Dictionary<string, object>()), 
+                    CreateInputSchema(new Dictionary<string, object>
+                    {
+                        ["detailLevel"] = new { type = "string", description = "Level of detail: 'detailed' for full info, 'simple' for basic info (default: detailed)", @default = "detailed" }
+                    }), 
                     args => ExecuteOnMainThread(() => UnitySceneTools.GetCurrentSceneInfo(args)));
             }
 
@@ -696,98 +699,132 @@ namespace Unity.MCP.Editor
                     args => ExecuteOnMainThread(() => UnityToolsMain.GetThreadStackInfo(args)));
             }
                 
-            RegisterTool("create_gameobject", "Create a new GameObject", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["name"] = new { type = "string", description = "Name of the GameObject" },
-                    ["parent"] = new { type = "string", description = "Parent GameObject path (optional)" }
-                }), 
-                args => ExecuteOnMainThread(() => UnityGameObjectTools.CreateGameObject(args)));
+            if (config.IsToolEnabled("create_gameobject"))
+            {
+                RegisterTool("create_gameobject", "Create a new GameObject", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["name"] = new { type = "string", description = "Name of the GameObject" },
+                        ["parent"] = new { type = "string", description = "Parent GameObject path (optional)" }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityGameObjectTools.CreateGameObject(args)));
+            }
                 
-            RegisterTool("add_component", "Add a component to a GameObject with retry mechanism", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["gameObject"] = new { type = "string", description = "Name of the GameObject" },
-                    ["component"] = new { type = "string", description = "Type of component to add" },
-                    ["maxRetries"] = new { type = "integer", description = "Maximum number of retry attempts (default: 3)", @default = 3 },
-                    ["retryDelay"] = new { type = "integer", description = "Delay between retries in milliseconds (default: 100)", @default = 100 }
-                }), 
-                args => ExecuteOnMainThread(() => UnityComponentTools.AddComponent(args)));
+            if (config.IsToolEnabled("add_component"))
+            {
+                RegisterTool("add_component", "Add a component to a GameObject with retry mechanism", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["gameObject"] = new { type = "string", description = "Name of the GameObject" },
+                        ["component"] = new { type = "string", description = "Type of component to add" },
+                        ["maxRetries"] = new { type = "integer", description = "Maximum number of retry attempts (default: 3)", @default = 3 },
+                        ["retryDelay"] = new { type = "integer", description = "Delay between retries in milliseconds (default: 100)", @default = 100 }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityComponentTools.AddComponent(args)));
+            }
                 
-            RegisterTool("set_transform", "Set transform properties of a GameObject", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["gameObject"] = new { type = "string", description = "Name of the GameObject" },
-                    ["position"] = new { type = "object", description = "Position {x, y, z}" },
-                    ["rotation"] = new { type = "object", description = "Rotation {x, y, z}" },
-                    ["scale"] = new { type = "object", description = "Scale {x, y, z}" }
-                }), 
-                args => ExecuteOnMainThread(() => UnityGameObjectTools.SetTransform(args)));
+            if (config.IsToolEnabled("set_transform"))
+            {
+                RegisterTool("set_transform", "Set transform properties of a GameObject", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["gameObject"] = new { type = "string", description = "Name of the GameObject" },
+                        ["position"] = new { type = "object", description = "Position {x, y, z}" },
+                        ["rotation"] = new { type = "object", description = "Rotation {x, y, z}" },
+                        ["scale"] = new { type = "object", description = "Scale {x, y, z}" }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityGameObjectTools.SetTransform(args)));
+            }
                 
-            RegisterTool("import_asset", "Import an asset into the project", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["path"] = new { type = "string", description = "Path to the asset file" }
-                }), 
-                args => ExecuteOnMainThread(() => UnityToolsMain.ImportAsset(args)));
+            if (config.IsToolEnabled("import_asset"))
+            {
+                RegisterTool("import_asset", "Import an asset into the project", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["path"] = new { type = "string", description = "Path to the asset file" }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityToolsMain.ImportAsset(args)));
+            }
                 
-            RegisterTool("refresh_assets", "Force refresh Unity asset database", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["importMode"] = new { type = "string", description = "Import mode: normal, force, synchronous", @default = "normal" },
-                    ["forceUpdate"] = new { type = "boolean", description = "Force update all assets", @default = false }
-                }), 
-                args => ExecuteOnMainThread(() => UnityToolsMain.RefreshAssets(args)));
+            if (config.IsToolEnabled("refresh_assets"))
+            {
+                RegisterTool("refresh_assets", "Force refresh Unity asset database", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["importMode"] = new { type = "string", description = "Import mode: normal, force, synchronous", @default = "normal" },
+                        ["forceUpdate"] = new { type = "boolean", description = "Force update all assets", @default = false }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityToolsMain.RefreshAssets(args)));
+            }
                 
-            RegisterTool("compile_scripts", "Trigger Unity script compilation", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                }), 
-                args => ExecuteOnMainThread(() => UnityToolsMain.CompileScripts(args)));
+            if (config.IsToolEnabled("compile_scripts"))
+            {
+                RegisterTool("compile_scripts", "Trigger Unity script compilation", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityToolsMain.CompileScripts(args)));
+            }
                 
-            RegisterTool("wait_for_compilation", "Wait for Unity compilation to complete", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["timeout"] = new { type = "integer", description = "Timeout in seconds", @default = 30 },
-                    ["checkInterval"] = new { type = "integer", description = "Check interval in milliseconds", @default = 100 }
-                }), 
-                args => ExecuteOnMainThread(() => UnityToolsMain.WaitForCompilation(args)));
+            if (config.IsToolEnabled("wait_for_compilation"))
+            {
+                RegisterTool("wait_for_compilation", "Wait for Unity compilation to complete", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["timeout"] = new { type = "integer", description = "Timeout in seconds", @default = 30 },
+                        ["checkInterval"] = new { type = "integer", description = "Check interval in milliseconds", @default = 100 }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityToolsMain.WaitForCompilation(args)));
+            }
                 
             // 高级游戏对象操作接口
-            RegisterTool("find_gameobject", "Find a GameObject by name or path", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["name"] = new { type = "string", description = "Name or path of the GameObject to find" }
-                }), 
-                args => ExecuteOnMainThread(() => UnityGameObjectTools.FindGameObject(args)));
+            if (config.IsToolEnabled("find_gameobject"))
+            {
+                RegisterTool("find_gameobject", "Find a GameObject by name or path", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["name"] = new { type = "string", description = "Name or path of the GameObject to find" }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityGameObjectTools.FindGameObject(args)));
+            }
                 
-            RegisterTool("delete_gameobject", "Delete a GameObject", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["name"] = new { type = "string", description = "Name of the GameObject to delete" }
-                }), 
-                args => ExecuteOnMainThread(() => UnityGameObjectTools.DeleteGameObject(args)));
+            if (config.IsToolEnabled("delete_gameobject"))
+            {
+                RegisterTool("delete_gameobject", "Delete a GameObject", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["name"] = new { type = "string", description = "Name of the GameObject to delete" }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityGameObjectTools.DeleteGameObject(args)));
+            }
                 
-            RegisterTool("duplicate_gameobject", "Duplicate a GameObject", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["name"] = new { type = "string", description = "Name of the GameObject to duplicate" },
-                    ["newName"] = new { type = "string", description = "Name for the duplicated GameObject (optional)" }
-                }), 
-                args => ExecuteOnMainThread(() => UnityGameObjectTools.DuplicateGameObject(args)));
+            if (config.IsToolEnabled("duplicate_gameobject"))
+            {
+                RegisterTool("duplicate_gameobject", "Duplicate a GameObject", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["name"] = new { type = "string", description = "Name of the GameObject to duplicate" },
+                        ["newName"] = new { type = "string", description = "Name for the duplicated GameObject (optional)" }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityGameObjectTools.DuplicateGameObject(args)));
+            }
                 
-            RegisterTool("set_parent", "Set parent of a GameObject", 
-                CreateInputSchema(new Dictionary<string, object> 
-                {
-                    ["child"] = new { type = "string", description = "Name of the child GameObject" },
-                    ["parent"] = new { type = "string", description = "Name of the parent GameObject (null to unparent)" }
-                }), 
-                args => ExecuteOnMainThread(() => UnityGameObjectTools.SetParent(args)));
+            if (config.IsToolEnabled("set_parent"))
+            {
+                RegisterTool("set_parent", "Set parent of a GameObject", 
+                    CreateInputSchema(new Dictionary<string, object> 
+                    {
+                        ["child"] = new { type = "string", description = "Name of the child GameObject" },
+                        ["parent"] = new { type = "string", description = "Name of the parent GameObject (null to unparent)" }
+                    }), 
+                    args => ExecuteOnMainThread(() => UnityGameObjectTools.SetParent(args)));
+            }
                 
             RegisterTool("get_gameobject_info", "Get detailed information about a GameObject", 
                  CreateInputSchema(new Dictionary<string, object> 
                  {
-                     ["name"] = new { type = "string", description = "Name of the GameObject" }
+                     ["name"] = new { type = "string", description = "Name of the GameObject" },
+                     ["detailLevel"] = new { type = "string", description = "Level of detail: 'detailed' for full info, 'simple' for basic info (default: detailed)", @default = "detailed" }
                  }), 
                  args => ExecuteOnMainThread(() => UnityGameObjectTools.GetGameObjectInfo(args)));
                 
@@ -979,6 +1016,110 @@ namespace Unity.MCP.Editor
                     ["prefabPath"] = new { type = "string", description = "Path to the prefab asset" }
                 }), 
                 args => ExecuteOnMainThread(() => UnityToolsMain.GetPrefabInfo(args)));
+                
+            RegisterTool("delete_prefab", "Delete a prefab file from the project", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["prefabPath"] = new { type = "string", description = "Path to the prefab asset to delete" },
+                    ["confirmDelete"] = new { type = "boolean", description = "Confirmation flag to proceed with deletion (required for safety)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.DeletePrefab(args)));
+                
+            // 几何体管理系统接口
+            RegisterTool("create_geometry", "Create basic geometry shapes (Cube, Sphere, Cylinder, etc.)", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["geometryType"] = new { type = "string", description = "Type of geometry: Cube, Sphere, Cylinder, Capsule, Plane, Quad" },
+                    ["objectName"] = new { type = "string", description = "Name of the created object (optional)" },
+                    ["parentName"] = new { type = "string", description = "Name of parent object (optional)" },
+                    ["position"] = new { type = "object", description = "Position {x, y, z} (optional, default: {0,0,0})" },
+                    ["rotation"] = new { type = "object", description = "Rotation {x, y, z} in degrees (optional, default: {0,0,0})" },
+                    ["scale"] = new { type = "object", description = "Scale {x, y, z} (optional, default: {1,1,1})" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.CreateGeometry(args)));
+                
+            RegisterTool("create_custom_mesh", "Create custom mesh geometry", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["objectName"] = new { type = "string", description = "Name of the created object (optional)" },
+                    ["meshType"] = new { type = "string", description = "Type of custom mesh: Triangle, Square (optional, default: Triangle)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.CreateCustomMesh(args)));
+                
+            // 环境管理系统接口
+            RegisterTool("set_background_color", "Set scene background color", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["color"] = new { type = "object", description = "Color {r, g, b, a} values (0-1 range) (optional)" },
+                    ["colorHex"] = new { type = "string", description = "Hex color string like #FF0000 (optional, alternative to color object)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.SetBackgroundColor(args)));
+                
+            RegisterTool("set_skybox", "Set scene skybox material", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["skyboxPath"] = new { type = "string", description = "Path to skybox material asset (optional, uses default if not provided)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.SetSkybox(args)));
+                
+            RegisterTool("set_fog", "Configure scene fog settings", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["enabled"] = new { type = "boolean", description = "Enable or disable fog (optional, default: true)" },
+                    ["fogMode"] = new { type = "string", description = "Fog mode: Linear, Exponential, ExponentialSquared (optional, default: Linear)" },
+                    ["fogColor"] = new { type = "object", description = "Fog color {r, g, b, a} (optional)" },
+                    ["fogStartDistance"] = new { type = "number", description = "Fog start distance for Linear mode (optional)" },
+                    ["fogEndDistance"] = new { type = "number", description = "Fog end distance for Linear mode (optional)" },
+                    ["fogDensity"] = new { type = "number", description = "Fog density for Exponential modes (optional)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.SetFog(args)));
+                
+            RegisterTool("set_ambient_light", "Configure ambient lighting settings", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["ambientMode"] = new { type = "string", description = "Ambient mode: Skybox, Trilight, Flat (optional, default: Trilight)" },
+                    ["skyColor"] = new { type = "object", description = "Sky color {r, g, b} for Trilight mode (optional)" },
+                    ["equatorColor"] = new { type = "object", description = "Equator color {r, g, b} for Trilight mode (optional)" },
+                    ["groundColor"] = new { type = "object", description = "Ground color {r, g, b} for Trilight mode (optional)" },
+                    ["ambientColor"] = new { type = "object", description = "Ambient color {r, g, b} for Flat mode (optional)" },
+                    ["ambientIntensity"] = new { type = "number", description = "Ambient light intensity (optional)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.SetAmbientLight(args)));
+                
+            // 相机管理系统接口
+            RegisterTool("set_camera_properties", "Set camera properties and parameters", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["cameraName"] = new { type = "string", description = "Name of the camera (optional, default: Main Camera)" },
+                    ["fieldOfView"] = new { type = "number", description = "Field of view in degrees (optional)" },
+                    ["nearClipPlane"] = new { type = "number", description = "Near clipping plane distance (optional)" },
+                    ["farClipPlane"] = new { type = "number", description = "Far clipping plane distance (optional)" },
+                    ["projectionMode"] = new { type = "string", description = "Projection mode: Perspective, Orthographic (optional)" },
+                    ["orthographicSize"] = new { type = "number", description = "Orthographic size (optional, for orthographic projection)" },
+                    ["position"] = new { type = "object", description = "Camera position {x, y, z} (optional)" },
+                    ["rotation"] = new { type = "object", description = "Camera rotation {x, y, z} in degrees (optional)" },
+                    ["clearFlags"] = new { type = "string", description = "Clear flags: Skybox, SolidColor, Depth, Nothing (optional)" },
+                    ["backgroundColor"] = new { type = "object", description = "Background color {r, g, b, a} (optional)" },
+                    ["depth"] = new { type = "number", description = "Camera depth for rendering order (optional)" },
+                    ["renderingPath"] = new { type = "string", description = "Rendering path: Forward, Deferred, Legacy, Use Player Settings (optional)" },
+                    ["viewportRect"] = new { type = "object", description = "Viewport rectangle {x, y, width, height} (optional)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.SetCameraProperties(args)));
+                
+            RegisterTool("get_camera_properties", "Get camera properties and parameters", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["cameraName"] = new { type = "string", description = "Name of the camera (optional, default: Main Camera)" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.GetCameraProperties(args)));
+                
+            RegisterTool("create_camera", "Create a new camera in the scene", 
+                CreateInputSchema(new Dictionary<string, object> 
+                {
+                    ["cameraName"] = new { type = "string", description = "Name of the new camera (optional, default: New Camera)" },
+                    ["position"] = new { type = "object", description = "Camera position {x, y, z} (optional, default: {0,1,-10})" }
+                }), 
+                args => ExecuteOnMainThread(() => UnityToolsMain.CreateCamera(args)));
                 
             // 脚本管理系统接口
             RegisterTool("create_script", "Create a new C# script file", 

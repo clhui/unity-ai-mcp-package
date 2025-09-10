@@ -177,7 +177,10 @@ namespace Unity.MCP.Editor
                 try
                 {
                     McpLogger.LogDebug($"🔄 DelayCall执行 - 线程ID: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-                    result = func();
+                    if (!completed)
+                    {
+                        result = func();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -264,7 +267,11 @@ namespace Unity.MCP.Editor
             EditorApplication.delayCall += () => {
                 try
                 {
-                    action();
+                    McpLogger.LogDebug($"🔄 DelayCall执行 - 线程ID: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+                    if (!completed)
+                    {
+                        action();
+                    }
                 }
                 catch (Exception ex)
                 {

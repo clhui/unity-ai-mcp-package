@@ -89,6 +89,22 @@ namespace Unity.MCP.Editor
             ["instantiate_prefab"] = "实例化预制体",
             ["list_prefabs"] = "列出预制体",
             ["get_prefab_info"] = "获取预制体信息",
+            ["delete_prefab"] = "删除预制体",
+            
+            // 几何体管理工具
+            ["create_geometry"] = "创建几何体",
+            ["create_custom_mesh"] = "创建自定义网格",
+            
+            // 环境管理工具
+            ["set_background_color"] = "设置背景色",
+            ["set_skybox"] = "设置天空盒",
+            ["set_fog"] = "设置雾效",
+            ["set_ambient_light"] = "设置环境光",
+            
+            // 相机管理工具
+            ["set_camera_properties"] = "设置相机属性",
+            ["get_camera_properties"] = "获取相机属性",
+            ["create_camera"] = "创建相机",
             
             // 脚本管理工具
             ["create_script"] = "创建脚本",
@@ -871,6 +887,13 @@ namespace Unity.MCP.Editor
             
             try
             {
+                // 确保之前的服务器实例已清理
+                if (_server != null)
+                {
+                    try { _server.Stop(); } catch { }
+                    _server = null;
+                }
+                
                 // 创建新的服务器实例
                 _server = new McpServer(_port);
                 

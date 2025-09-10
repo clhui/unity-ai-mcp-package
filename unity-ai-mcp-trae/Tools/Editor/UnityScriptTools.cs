@@ -8,6 +8,7 @@ using Unity.MCP;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.Compilation;
 #endif
 
 namespace Unity.MCP.Tools.Editor
@@ -221,53 +222,121 @@ namespace Unity.MCP.Tools.Editor
 #if UNITY_EDITOR
             try
             {
-                // 强制重新编译所有脚本
-                AssetDatabase.Refresh();
+                // 清除之前的编译状态
+                var compilationMessages = new List<string>();
+                bool hasErrors = false;
+                bool hasWarnings = false;
                 
-                // 等待编译完成
-                int timeout = 30; // 30秒超时
-                int elapsed = 0;
-                
-                while (EditorApplication.isCompiling && elapsed < timeout)
+                // 订阅编译完成事件
+                System.Action<string, CompilerMessage[]> onCompilationFinished = null;
+                onCompilationFinished = (assemblyPath, messages) =>
                 {
-                    System.Threading.Thread.Sleep(1000);
-                    elapsed++;
-                }
-                
-                if (EditorApplication.isCompiling)
-                {
-                    return new McpToolResult
+                    foreach (var message in messages)
                     {
-                        Content = new List<McpContent>
+                        string messageText = $"{message.type}: {message.message}";
+                        if (!string.IsNullOrEmpty(message.file))
                         {
-                            new McpContent { Type = "text", Text = "Compilation timeout after 30 seconds" }
-                        },
-                        IsError = true
-                    };
-                }
-                
-                // 检查编译错误
-                var errors = GetCompilationErrors();
-                
-                if (errors.Count > 0)
-                {
-                    return new McpToolResult
-                    {
-                        Content = new List<McpContent>
-                        {
-                            new McpContent { Type = "text", Text = $"Compilation completed with {errors.Count} errors:\n" + string.Join("\n", errors) }
-                        },
-                        IsError = true
-                    };
-                }
-                
-                return new McpToolResult
-                {
-                    Content = new List<McpContent>
-                    {
-                        new McpContent { Type = "text", Text = "Scripts compiled successfully with no errors" }
+                            messageText += $" (at {message.file}:{message.line})";
+                        }
+                        compilationMessages.Add(messageText);
+                        
+                        if (message.type == CompilerMessageType.Error)
+                            hasErrors = true;
+                        else if (message.type == CompilerMessageType.Warning)
+                            hasWarnings = true;
                     }
                 };
+                
+                CompilationPipeline.assemblyCompilationFinished += onCompilationFinished;
+                
+                try
+                {
+                    // 强制重新编译所有脚本
+                    AssetDatabase.Refresh();
+                    CompilationPipeline.RequestScriptCompilation();
+                    
+                    // 等待编译完成
+                    int timeout = 60; // 60秒超时
+                    int elapsed = 0;
+                    
+                    while (EditorApplication.isCompiling && elapsed < timeout)
+                    {
+                        System.Threading.Thread.Sleep(500);
+                        elapsed++;
+                        
+                        // 每10秒显示一次进度
+                        if (elapsed % 20 == 0)
+                        {
+                            McpLogger.LogTool($"编译进行中... ({elapsed/2}秒)");
+                        }
+                    }
+                    
+                    if (EditorApplication.isCompiling)
+                    {
+                        return new McpToolResult
+                        {
+                            Content = new List<McpContent>
+                            {
+                                new McpContent { Type = "text", Text = "⏰ 编译超时（60秒）\n可能存在复杂的编译任务或编译错误，请检查Unity Console窗口获取详细信息。" }
+                            },
+                            IsError = true
+                        };
+                    }
+                    
+                    // 等待一小段时间确保所有编译消息都被收集
+                    System.Threading.Thread.Sleep(1000);
+                    
+                    var result = new System.Text.StringBuilder();
+                    result.AppendLine("📋 脚本编译完成");
+                    result.AppendLine($"⏱️ 编译时间: {elapsed/2}秒");
+                    
+                    if (compilationMessages.Count > 0)
+                    {
+                        result.AppendLine($"📊 编译消息: {compilationMessages.Count}条");
+                        
+                        if (hasErrors)
+                        {
+                            result.AppendLine("\n🔴 编译错误:");
+                            foreach (var msg in compilationMessages.Where(m => m.StartsWith("Error:")))
+                            {
+                                result.AppendLine($"  {msg}");
+                            }
+                        }
+                        
+                        if (hasWarnings)
+                        {
+                            result.AppendLine("\n🟡 编译警告:");
+                            foreach (var msg in compilationMessages.Where(m => m.StartsWith("Warning:")))
+                            {
+                                result.AppendLine($"  {msg}");
+                            }
+                        }
+                        
+                        return new McpToolResult
+                        {
+                            Content = new List<McpContent>
+                            {
+                                new McpContent { Type = "text", Text = result.ToString() }
+                            },
+                            IsError = hasErrors
+                        };
+                    }
+                    else
+                    {
+                        result.AppendLine("✅ 编译成功，无错误或警告");
+                        return new McpToolResult
+                        {
+                            Content = new List<McpContent>
+                            {
+                                new McpContent { Type = "text", Text = result.ToString() }
+                            }
+                        };
+                    }
+                }
+                finally
+                {
+                    CompilationPipeline.assemblyCompilationFinished -= onCompilationFinished;
+                }
             }
             catch (Exception ex)
             {
@@ -275,7 +344,7 @@ namespace Unity.MCP.Tools.Editor
                 {
                     Content = new List<McpContent>
                     {
-                        new McpContent { Type = "text", Text = $"Failed to compile scripts: {ex.Message}" }
+                        new McpContent { Type = "text", Text = $"❌ 编译脚本时发生错误: {ex.Message}\n\n堆栈跟踪:\n{ex.StackTrace}" }
                     },
                     IsError = true
                 };

@@ -1,6 +1,6 @@
 {
   "name": "com.unity.ai-mcp-trae",
-  "version": "1.9.139",
+  "version": "1.9.152",
   "displayName": "Unity MCP Trae FOR AI",
   "description": "Model Context Protocol server for Unity Editor automation with Trae AI integration",
   "unity": "2023.2",

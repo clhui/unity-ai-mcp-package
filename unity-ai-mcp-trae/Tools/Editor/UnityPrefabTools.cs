@@ -435,5 +435,119 @@ namespace Unity.MCP.Tools.Editor
                 };
             }
         }
+
+        /// <summary>
+        /// 删除预制体文件
+        /// </summary>
+        public static McpToolResult DeletePrefab(JObject arguments)
+        {
+            try
+            {
+#if UNITY_EDITOR
+                string prefabPath = arguments.ContainsKey("prefabPath") ? arguments["prefabPath"].ToString() : "";
+                bool confirmDelete = arguments.ContainsKey("confirmDelete") && (bool)arguments["confirmDelete"];
+
+                if (string.IsNullOrEmpty(prefabPath))
+                {
+                    return new McpToolResult
+                    {
+                        Content = new List<McpContent>
+                        {
+                            new McpContent { Type = "text", Text = "Error: prefabPath is required" }
+                        },
+                        IsError = true
+                    };
+                }
+
+                // 检查预制体文件是否存在
+                if (!File.Exists(prefabPath))
+                {
+                    return new McpToolResult
+                    {
+                        Content = new List<McpContent>
+                        {
+                            new McpContent { Type = "text", Text = $"Error: Prefab file not found at path '{prefabPath}'" }
+                        },
+                        IsError = true
+                    };
+                }
+
+                // 验证是否为预制体文件
+                if (!prefabPath.EndsWith(".prefab", StringComparison.OrdinalIgnoreCase))
+                {
+                    return new McpToolResult
+                    {
+                        Content = new List<McpContent>
+                        {
+                            new McpContent { Type = "text", Text = $"Error: '{prefabPath}' is not a prefab file (.prefab)" }
+                        },
+                        IsError = true
+                    };
+                }
+
+                // 安全检查：需要确认删除
+                if (!confirmDelete)
+                {
+                    return new McpToolResult
+                    {
+                        Content = new List<McpContent>
+                        {
+                            new McpContent { Type = "text", Text = $"Warning: This will permanently delete the prefab '{prefabPath}'. Set 'confirmDelete' to true to proceed." }
+                        },
+                        IsError = true
+                    };
+                }
+
+                // 获取预制体名称用于日志
+                string prefabName = Path.GetFileNameWithoutExtension(prefabPath);
+
+                // 删除预制体文件
+                bool deleteSuccess = AssetDatabase.DeleteAsset(prefabPath);
+                
+                if (deleteSuccess)
+                {
+                    AssetDatabase.Refresh();
+                    return new McpToolResult
+                    {
+                        Content = new List<McpContent>
+                        {
+                            new McpContent { Type = "text", Text = $"Prefab '{prefabName}' deleted successfully from '{prefabPath}'" }
+                        }
+                    };
+                }
+                else
+                {
+                    return new McpToolResult
+                    {
+                        Content = new List<McpContent>
+                        {
+                            new McpContent { Type = "text", Text = $"Error: Failed to delete prefab '{prefabName}' at '{prefabPath}'. The file may be in use or protected." }
+                        },
+                        IsError = true
+                    };
+                }
+#else
+                return new McpToolResult
+                {
+                    Content = new List<McpContent>
+                    {
+                        new McpContent { Type = "text", Text = "Error: This tool can only be used in Unity Editor" }
+                    },
+                    IsError = true
+                };
+#endif
+            }
+            catch (Exception e)
+            {
+                return new McpToolResult
+                {
+                    Content = new List<McpContent>
+                    {
+                        new McpContent { Type = "text", Text = $"Error deleting prefab: {e.Message}" }
+                    },
+                    IsError = true
+                };
+            }
+        }
     }
 }

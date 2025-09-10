@@ -701,6 +701,108 @@ namespace Unity.MCP.Tools.Editor
         
         #endregion
 
+        #region Geometry Management - 几何体管理
+        
+        /// <summary>
+        /// 创建基础几何体
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult CreateGeometry(JObject arguments)
+        {
+            return UnityGeometryTools.CreateGeometry(arguments);
+        }
+        
+        /// <summary>
+        /// 创建自定义网格几何体
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult CreateCustomMesh(JObject arguments)
+        {
+            return UnityGeometryTools.CreateCustomMesh(arguments);
+        }
+        
+        #endregion
+
+        #region Environment Management - 环境管理
+        
+        /// <summary>
+        /// 设置场景背景色
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult SetBackgroundColor(JObject arguments)
+        {
+            return UnityEnvironmentTools.SetBackgroundColor(arguments);
+        }
+        
+        /// <summary>
+        /// 设置天空盒
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult SetSkybox(JObject arguments)
+        {
+            return UnityEnvironmentTools.SetSkybox(arguments);
+        }
+        
+        /// <summary>
+        /// 设置雾效
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult SetFog(JObject arguments)
+        {
+            return UnityEnvironmentTools.SetFog(arguments);
+        }
+        
+        /// <summary>
+        /// 设置环境光照
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult SetAmbientLight(JObject arguments)
+        {
+            return UnityEnvironmentTools.SetAmbientLight(arguments);
+        }
+        
+        #endregion
+
+        #region Camera Management - 相机管理
+        
+        /// <summary>
+        /// 设置相机属性
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult SetCameraProperties(JObject arguments)
+        {
+            return UnityCameraTools.SetCameraProperties(arguments);
+        }
+        
+        /// <summary>
+        /// 获取相机属性
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>相机属性信息</returns>
+        public static McpToolResult GetCameraProperties(JObject arguments)
+        {
+            return UnityCameraTools.GetCameraProperties(arguments);
+        }
+        
+        /// <summary>
+        /// 创建新相机
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult CreateCamera(JObject arguments)
+        {
+            return UnityCameraTools.CreateCamera(arguments);
+        }
+        
+        #endregion
+
         #region Prefab Management - 预制体管理
         
         /// <summary>
@@ -741,6 +843,16 @@ namespace Unity.MCP.Tools.Editor
         public static McpToolResult GetPrefabInfo(JObject arguments)
         {
             return UnityPrefabTools.GetPrefabInfo(arguments);
+        }
+        
+        /// <summary>
+        /// 删除预制体文件
+        /// </summary>
+        /// <param name="arguments">参数</param>
+        /// <returns>操作结果</returns>
+        public static McpToolResult DeletePrefab(JObject arguments)
+        {
+            return UnityPrefabTools.DeletePrefab(arguments);
         }
         
         #endregion

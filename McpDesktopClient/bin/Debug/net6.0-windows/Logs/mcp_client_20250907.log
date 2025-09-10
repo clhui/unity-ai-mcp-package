@@ -102,3 +102,9 @@
 [2025-09-07 23:53:36.248] [INFO] [Application] MCP桌面客户端启动成功
 [2025-09-07 23:53:37.869] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
 [2025-09-07 23:53:38.250] [INFO] [Connection] 连接成功：发现 40 个工具
+[2025-09-08 00:32:43.924] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-08 00:32:44.101] [INFO] [Connection] 连接成功：发现 40 个工具
+[2025-09-08 00:32:46.764] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-08 00:32:46.800] [INFO] [Connection] 连接成功：发现 40 个工具
+[2025-09-08 00:58:47.582] [INFO] [Connection] 用户尝试连接到服务器：http://localhost:9123/mcp
+[2025-09-08 00:58:47.678] [INFO] [Connection] 连接成功：发现 40 个工具

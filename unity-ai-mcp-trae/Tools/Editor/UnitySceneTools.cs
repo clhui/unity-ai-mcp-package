@@ -126,6 +126,10 @@ namespace Unity.MCP.Tools.Editor
                     };
                 }
                 
+                // 获取详细级别参数，默认为详细信息
+                var detailLevel = arguments["detailLevel"]?.ToString()?.ToLower() ?? "detailed";
+                bool isDetailed = detailLevel == "detailed" || detailLevel == "detail";
+                
                 var sceneInfo = new System.Text.StringBuilder();
                 sceneInfo.AppendLine($"当前场景信息:");
                 sceneInfo.AppendLine($"- 场景名称: {activeScene.name}");
@@ -136,36 +140,64 @@ namespace Unity.MCP.Tools.Editor
                 sceneInfo.AppendLine($"- 根对象数量: {activeScene.rootCount}");
                 sceneInfo.AppendLine();
                 
-                // 获取场景中的根对象详细信息
+                // 获取场景中的根对象信息
                 var rootObjects = activeScene.GetRootGameObjects();
                 sceneInfo.AppendLine($"根GameObject列表 ({rootObjects.Length}个):");
                 
-                foreach (var obj in rootObjects)
+                if (isDetailed)
                 {
-                    sceneInfo.AppendLine($"  📦 {obj.name}");
-                    sceneInfo.AppendLine($"    - 活动状态: {obj.activeInHierarchy}");
-                    sceneInfo.AppendLine($"    - 标签: {obj.tag}");
-                    sceneInfo.AppendLine($"    - 层级: {obj.layer}");
-                    
-                    // 获取组件信息
-                    var components = obj.GetComponents<Component>();
-                    sceneInfo.AppendLine($"    - 组件 ({components.Length}个):");
-                    foreach (var comp in components)
+                    // 详细信息模式：显示每个对象的完整信息
+                    foreach (var obj in rootObjects)
                     {
-                        if (comp != null)
+                        sceneInfo.AppendLine($"  📦 {obj.name}");
+                        sceneInfo.AppendLine($"    - 活动状态: {obj.activeInHierarchy}");
+                        sceneInfo.AppendLine($"    - 标签: {obj.tag}");
+                        sceneInfo.AppendLine($"    - 层级: {obj.layer}");
+                        sceneInfo.AppendLine($"    - 位置: {obj.transform.position}");
+                        sceneInfo.AppendLine($"    - 旋转: {obj.transform.rotation.eulerAngles}");
+                        sceneInfo.AppendLine($"    - 缩放: {obj.transform.localScale}");
+                        
+                        // 获取组件信息
+                        var components = obj.GetComponents<Component>();
+                        sceneInfo.AppendLine($"    - 组件 ({components.Length}个):");
+                        foreach (var comp in components)
                         {
-                            sceneInfo.AppendLine($"      🔧 {comp.GetType().Name}");
+                            if (comp != null)
+                            {
+                                sceneInfo.AppendLine($"      🔧 {comp.GetType().Name}");
+                            }
                         }
+                        
+                        // 获取子对象数量
+                        var childCount = obj.transform.childCount;
+                        if (childCount > 0)
+                        {
+                            sceneInfo.AppendLine($"    - 子对象数量: {childCount}");
+                            // 列出前5个子对象名称
+                            for (int i = 0; i < Math.Min(childCount, 5); i++)
+                            {
+                                sceneInfo.AppendLine($"      └─ {obj.transform.GetChild(i).name}");
+                            }
+                            if (childCount > 5)
+                            {
+                                sceneInfo.AppendLine($"      └─ ... 还有 {childCount - 5} 个子对象");
+                            }
+                        }
+                        
+                        sceneInfo.AppendLine();
                     }
-                    
-                    // 获取子对象数量
-                    var childCount = obj.transform.childCount;
-                    if (childCount > 0)
+                }
+                else
+                {
+                    // 简单信息模式：只显示基本信息
+                    foreach (var obj in rootObjects)
                     {
-                        sceneInfo.AppendLine($"    - 子对象数量: {childCount}");
+                        var childCount = obj.transform.childCount;
+                        var componentCount = obj.GetComponents<Component>().Length;
+                        var status = obj.activeInHierarchy ? "✓" : "✗";
+                        
+                        sceneInfo.AppendLine($"  {status} {obj.name} (组件:{componentCount}, 子对象:{childCount})");
                     }
-                    
-                    sceneInfo.AppendLine();
                 }
                 
                 return new McpToolResult

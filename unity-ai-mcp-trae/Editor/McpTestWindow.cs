@@ -446,6 +446,13 @@ namespace Unity.MCP.Editor
                     return;
                 }
                 
+                // 确保之前的服务器实例已清理
+                if (_testServer != null)
+                {
+                    try { _testServer.Stop(); } catch { }
+                    _testServer = null;
+                }
+                
                 _testServer = new McpServer(_testPort);
                 _testServer.Start();
                 
@@ -475,6 +482,13 @@ namespace Unity.MCP.Editor
                 {
                     AddResult("✗ 服务器已在运行中，请先停止当前服务器");
                     return;
+                }
+                
+                // 确保之前的服务器实例已清理
+                if (_testServer != null)
+                {
+                    try { _testServer.Stop(); } catch { }
+                    _testServer = null;
                 }
                 
                 _testServer = new McpServer(_testPort);
